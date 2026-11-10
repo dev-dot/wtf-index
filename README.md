@@ -65,7 +65,7 @@ Ohne Supabase läuft alles im **lokalen Modus**: Startdaten kommen aus `data/ven
 2. Im SQL-Editor `supabase/schema.sql` und danach `supabase/seed.sql` ausführen.
 3. Unter *Authentication → Users* einen Nutzer mit E-Mail und Passwort anlegen und ihn zum Admin machen:
    ```sql
-   insert into public.admins (user_id) select id from auth.users where email = 'du@example.com';
+   insert into public.admins (user_id) select id from auth.users where email = 'du@example.com' on conflict do nothing;
    ```
 4. In `js/config.js` die Projekt-URL und den **anon**-Schlüssel eintragen.
 5. Unter *Authentication → Providers* die öffentliche Registrierung abschalten, damit sich niemand selbst Konten anlegt.

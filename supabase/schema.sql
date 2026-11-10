@@ -100,4 +100,4 @@ create policy "reports admin review" on public.reports for update to authenticat
 -- ---------- Ersten Admin anlegen ----------
 -- 1. Im Dashboard unter Authentication > Users einen Nutzer mit E-Mail und Passwort anlegen.
 -- 2. Dann (E-Mail anpassen):
--- insert into public.admins (user_id) select id from auth.users where email = 'du@example.com';
+-- insert into public.admins (user_id) select id from auth.users where email = 'du@example.com' on conflict do nothing;
