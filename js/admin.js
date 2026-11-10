@@ -49,7 +49,10 @@ $("loginForm").addEventListener("submit", async e => {
   if (!email || !pass) { msg($("lMsg"), "Bitte E-Mail und Passwort eingeben.", true); return; }
   $("lSubmit").disabled = true; msg($("lMsg"), "Anmeldung läuft …");
   try { await backend.signIn(email, pass); msg($("lMsg"), ""); $("lPass").value = ""; await route(); }
-  catch (err) { msg($("lMsg"), "Anmeldung fehlgeschlagen: " + errText(err), true); }
+  catch (err) {
+    const t = errText(err);
+    msg($("lMsg"), /invalid login credentials/i.test(t) ? "E-Mail oder Passwort stimmt nicht." : /email not confirmed/i.test(t) ? "Die E-Mail-Adresse ist noch nicht bestätigt." : "Anmeldung fehlgeschlagen: " + t, true);
+  }
   finally { $("lSubmit").disabled = false; }
 });
 $("logout").addEventListener("click", async () => { await backend.signOut(); await route(); });

@@ -11,7 +11,7 @@ export async function createBackend() {
 
 /* ---------------- Supabase ---------------- */
 async function supabaseBackend() {
-  const { createClient } = await import("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm");
+  const { createClient } = await import("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/+esm");
   const sb = createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonKey);
   const must = ({ data, error }) => { if (error) throw error; return data; };
 
