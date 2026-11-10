@@ -14,6 +14,7 @@ Die Preise stammen aus Speisekarten, Angaben des WTF-Teams und geprüften Besuch
 | Döner | Döner im Brot, normal, ohne Extras |
 | Pizza Margherita | Standardgröße laut Karte, **nur Pizzerien** |
 | Käsespätzle | Hauptgericht-Portion |
+| Maultaschen | Hauptgericht, geschmälzt oder mit Zwiebelschmelze, mit Kartoffelsalat oder Salat |
 
 **Bewertung** pro Index, gemessen am Median aller Preise:
 
@@ -37,6 +38,7 @@ data/venues.json           Lokale und Preise (Startdaten / lokaler Modus)
 data/stuttgart-boundary.json  Stadtgrenze (GADM, vereinfacht)
 supabase/schema.sql        Tabellen und Zugriffsregeln
 supabase/seed.sql          Startdaten aus data/venues.json (npm run seed)
+supabase/migrations/       Änderungen für eine bestehende Datenbank
 ```
 
 Keine Build-Tools nötig: Die Seite ist rein statisch und läuft auf jedem Static-Hosting (Netlify, Vercel, GitHub Pages).
@@ -69,6 +71,8 @@ Ohne Supabase läuft alles im **lokalen Modus**: Startdaten kommen aus `data/ven
    ```
 4. In `js/config.js` die Projekt-URL und den **anon**-Schlüssel eintragen.
 5. Unter *Authentication → Providers* die öffentliche Registrierung abschalten, damit sich niemand selbst Konten anlegt.
+
+Bei einer schon eingerichteten Datenbank kommen Änderungen als Dateien in `supabase/migrations/`. Jede einmal im SQL-Editor ausführen.
 
 Zugriffsregeln: Alle lesen aktive Lokale, Preise und freigegebene Meldungen. Alle dürfen Meldungen einreichen, die als `pending` ankommen. Schreiben und Freigeben dürfen nur Nutzer aus der Tabelle `admins`.
 

@@ -12,6 +12,7 @@ export const ITEMS = {
   doener:   { emoji: "🥙", label: "Döner",       chip: "im Brot",    title: "Döner",                spec: "Döner im Brot, normal, ohne Extras" },
   pizza:    { emoji: "🍕", label: "Margherita",  chip: "Pizza",      title: "Pizza Margherita",     spec: "Standardgröße laut Karte, nur Pizzerien" },
   spaetzle: { emoji: "🧀", label: "Käsespätzle", chip: "schwäbisch", title: "Käsespätzle",          spec: "Hauptgericht-Portion" },
+  maultaschen: { emoji: "🥟", label: "Maultaschen", chip: "geschmälzt", title: "Maultaschen", spec: "Hauptgericht · geschmälzt oder mit Zwiebelschmelze · mit Kartoffelsalat oder Salat" },
 };
 export const ITEM_KEYS = Object.keys(ITEMS);
 export const isBeer = it => it === "bier" || it === "bier3";

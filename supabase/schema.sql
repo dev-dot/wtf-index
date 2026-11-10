@@ -47,7 +47,7 @@ create policy "venues admin write" on public.venues for all to authenticated
 create table if not exists public.prices (
   id           uuid primary key default gen_random_uuid(),
   venue_id     text not null references public.venues (id) on delete cascade,
-  item         text not null check (item in ('wasser','bier3','bier','doener','pizza','spaetzle')),
+  item         text not null check (item in ('wasser','bier3','bier','doener','pizza','spaetzle','maultaschen')),
   price        numeric(5,2) not null check (price between 0.5 and 60),
   tap          text check (tap in ('f','b')),
   note         text check (char_length(note) <= 200),
@@ -72,7 +72,7 @@ create policy "prices admin write" on public.prices for all to authenticated
 create table if not exists public.reports (
   id          uuid primary key default gen_random_uuid(),
   venue_id    text not null references public.venues (id) on delete cascade,
-  item        text not null check (item in ('wasser','bier3','bier','doener','pizza','spaetzle')),
+  item        text not null check (item in ('wasser','bier3','bier','doener','pizza','spaetzle','maultaschen')),
   price       numeric(5,2) not null check (price between 0.5 and 60),
   tap         text check (tap in ('f','b')),
   note        text check (char_length(note) <= 120),

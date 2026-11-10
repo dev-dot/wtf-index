@@ -42,18 +42,24 @@ select * from (values
   ('r21', 'bier3', 3.5::numeric, null, 'Export, Fass oder Flasche nicht angegeben · CD Pils 4,00 €', 'Hauskarte (PDF)', null, '2026-11-10'::date, '10.11.2026', false),
   ('r21', 'bier', 5::numeric, null, 'Export, Fass oder Flasche nicht angegeben · CD Pils 5,50 €', 'Hauskarte (PDF)', null, '2026-11-10'::date, '10.11.2026', false),
   ('r21', 'spaetzle', 14::numeric, null, 'hausgemacht, mit Salat', 'Hauskarte (PDF)', null, '2026-11-10'::date, '10.11.2026', false),
+  ('r21', 'maultaschen', 16::numeric, null, 'geschmelzt, mit Kartoffelsalat und Salatbeilage', 'Hauskarte (PDF)', null, '2026-11-10'::date, '10.11.2026', false),
   ('r11', 'wasser', 8.5::numeric, null, 'Ensinger Bio Naturell / Medium', 'Hauskarte (PDF)', null, '2026-11-10'::date, '2026, Getränke 04/2025', false),
   ('r11', 'bier3', 4.7::numeric, 'f', 'Dinkelacker CD Pils vom Fass', 'Hauskarte (PDF)', null, '2026-11-10'::date, '2026, Getränke 04/2025', false),
   ('r11', 'spaetzle', 19.9::numeric, null, 'mit Röstzwiebeln & Feldsalat · Dez. 2023 noch 17,90 € (+11 %)', 'Hauskarte (PDF)', null, '2026-11-10'::date, '2026, Getränke 04/2025', false),
+  ('r11', 'maultaschen', 20.9::numeric, null, 'mit Zwiebelschmelze & schwäbischem Kartoffelsalat · Dez. 2023 noch 17,90 € (+17 %)', 'Hauskarte (PDF)', null, '2026-11-10'::date, '2026, Getränke 04/2025', false),
   ('r12', 'wasser', 7.2::numeric, null, 'Teinacher Medium / Still', 'Hauskarte (PDF)', null, '2026-11-10'::date, 'aktuell', false),
   ('r12', 'bier3', 5.1::numeric, 'f', 'Helles Export vom Fass · Pils 5,20 €', 'Hauskarte (PDF)', null, '2026-11-10'::date, 'aktuell', false),
   ('r12', 'spaetzle', 22.8::numeric, null, 'mit kleinem Salat · Dez. 2024 noch 20,10 € (+13 %)', 'Hauskarte (PDF)', null, '2026-11-10'::date, 'aktuell', false),
+  ('r12', 'maultaschen', 24.9::numeric, null, 'geschmelzt mit Kartoffelsalat · Dez. 2024 noch 22,40 € (+11 %)', 'Hauskarte (PDF)', null, '2026-11-10'::date, 'aktuell', false),
   ('r13', 'spaetzle', 16.9::numeric, null, 'mit gemischtem Salatteller', 'zur-kiste.de', 'https://www.zur-kiste.de/speisen-getraenke/', '2026-11-10'::date, '10.11.2026 geprüft', false),
+  ('r13', 'maultaschen', 16.9::numeric, null, 'geschmelzt mit Kartoffelsalat', 'zur-kiste.de', 'https://www.zur-kiste.de/speisen-getraenke/', '2026-11-10'::date, '10.11.2026 geprüft', false),
   ('r14', 'spaetzle', 14::numeric, null, 'mit Butterzwiebeln & gemischtem Salat · seit Dez. 2024 unverändert', 'Hauskarte (PDF)', null, '2025-09-01'::date, '09/2025', false),
+  ('r14', 'maultaschen', 13::numeric, null, 'geschmälzt oder geröstet mit Ei, mit Salat', 'Hauskarte (PDF)', null, '2025-09-01'::date, '09/2025', false),
   ('r15', 'wasser', 5.8::numeric, null, 'Teinacher Mineralwasser', 'Hauskarte (PDF)', null, '2026-10-06'::date, 'Herbst/Winter 2026/27', false),
   ('r15', 'bier3', 3.8::numeric, 'f', '„Bier-chen vom Fass“', 'Hauskarte (PDF)', null, '2026-10-06'::date, 'Herbst/Winter 2026/27', false),
   ('r15', 'bier', 4.8::numeric, 'f', '„Halbe vom Fass“', 'Hauskarte (PDF)', null, '2026-10-06'::date, 'Herbst/Winter 2026/27', false),
-  ('r15', 'spaetzle', 19.5::numeric, null, 'Burg-Kässpatzen mit Weisswein & Lauchzwiebel, Blattsalat · Dez. 2024 noch 18,50 € (+5 %)', 'Hauskarte (PDF)', null, '2026-10-06'::date, 'Herbst/Winter 2026/27', false)
+  ('r15', 'spaetzle', 19.5::numeric, null, 'Burg-Kässpatzen mit Weisswein & Lauchzwiebel, Blattsalat · Dez. 2024 noch 18,50 € (+5 %)', 'Hauskarte (PDF)', null, '2026-10-06'::date, 'Herbst/Winter 2026/27', false),
+  ('r15', 'maultaschen', 18.5::numeric, null, 'mit hausgemachtem Kartoffelsalat und Zwiebelsößle · Dez. 2024 noch 17,50 € (+6 %)', 'Hauskarte (PDF)', null, '2026-10-06'::date, 'Herbst/Winter 2026/27', false)
 ) as v(venue_id, item, price, tap, note, source_label, source_url, valid_from, stand_label, outdated)
 where not exists (
   select 1 from public.prices p

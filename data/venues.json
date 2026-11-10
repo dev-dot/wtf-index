@@ -327,13 +327,17 @@
     },
     "spaetzle": {
      "price": 14
+    },
+    "maultaschen": {
+     "price": 16
     }
    },
    "notes": {
     "spaetzle": "hausgemacht, mit Salat",
     "wasser": "Stilles Wasser oder Tafelwasser",
     "bier3": "Export, Fass oder Flasche nicht angegeben · CD Pils 4,00 €",
-    "bier": "Export, Fass oder Flasche nicht angegeben · CD Pils 5,50 €"
+    "bier": "Export, Fass oder Flasche nicht angegeben · CD Pils 5,50 €",
+    "maultaschen": "geschmelzt, mit Kartoffelsalat und Salatbeilage"
    }
   },
   {
@@ -362,13 +366,17 @@
     },
     "spaetzle": {
      "price": 19.9
+    },
+    "maultaschen": {
+     "price": 20.9
     }
    },
    "notes": {
     "spaetzle": "mit Röstzwiebeln & Feldsalat · Dez. 2023 noch 17,90 € (+11 %)",
     "wasser": "Ensinger Bio Naturell / Medium",
     "bier3": "Dinkelacker CD Pils vom Fass",
-    "bier": "Kein Pils oder Helles in 0,5 l (Hefeweizen 5,90 € zählt nicht)"
+    "bier": "Kein Pils oder Helles in 0,5 l (Hefeweizen 5,90 € zählt nicht)",
+    "maultaschen": "mit Zwiebelschmelze & schwäbischem Kartoffelsalat · Dez. 2023 noch 17,90 € (+17 %)"
    }
   },
   {
@@ -397,13 +405,17 @@
     },
     "spaetzle": {
      "price": 22.8
+    },
+    "maultaschen": {
+     "price": 24.9
     }
    },
    "notes": {
     "bier3": "Helles Export vom Fass · Pils 5,20 €",
     "spaetzle": "mit kleinem Salat · Dez. 2024 noch 20,10 € (+13 %)",
     "wasser": "Teinacher Medium / Still",
-    "bier": "Kein 0,5 l im Angebot, nur 0,3 l vom Fass (siehe Bier 0,3)"
+    "bier": "Kein 0,5 l im Angebot, nur 0,3 l vom Fass (siehe Bier 0,3)",
+    "maultaschen": "geschmelzt mit Kartoffelsalat · Dez. 2024 noch 22,40 € (+11 %)"
    }
   },
   {
@@ -425,13 +437,17 @@
    "prices": {
     "spaetzle": {
      "price": 16.9
+    },
+    "maultaschen": {
+     "price": 16.9
     }
    },
    "notes": {
     "spaetzle": "mit gemischtem Salatteller",
     "wasser": "Website zeigt nur Speisen und Wein, keine Wasserpreise",
     "bier3": "Website zeigt nur Speisen und Wein, keine Bierpreise",
-    "bier": "Website zeigt nur Speisen und Wein, keine Bierpreise"
+    "bier": "Website zeigt nur Speisen und Wein, keine Bierpreise",
+    "maultaschen": "geschmelzt mit Kartoffelsalat"
    }
   },
   {
@@ -453,13 +469,17 @@
    "prices": {
     "spaetzle": {
      "price": 14
+    },
+    "maultaschen": {
+     "price": 13
     }
    },
    "notes": {
     "spaetzle": "mit Butterzwiebeln & gemischtem Salat · seit Dez. 2024 unverändert",
     "wasser": "Speisekarte ohne Kaltgetränke",
     "bier3": "Speisekarte ohne Kaltgetränke",
-    "bier": "Speisekarte ohne Kaltgetränke"
+    "bier": "Speisekarte ohne Kaltgetränke",
+    "maultaschen": "geschmälzt oder geröstet mit Ei, mit Salat"
    }
   },
   {
@@ -492,13 +512,17 @@
     },
     "spaetzle": {
      "price": 19.5
+    },
+    "maultaschen": {
+     "price": 18.5
     }
    },
    "notes": {
     "spaetzle": "Burg-Kässpatzen mit Weisswein & Lauchzwiebel, Blattsalat · Dez. 2024 noch 18,50 € (+5 %)",
     "wasser": "Teinacher Mineralwasser",
     "bier3": "„Bier-chen vom Fass“",
-    "bier": "„Halbe vom Fass“"
+    "bier": "„Halbe vom Fass“",
+    "maultaschen": "mit hausgemachtem Kartoffelsalat und Zwiebelsößle · Dez. 2024 noch 17,50 € (+6 %)"
    }
   }
  ]
