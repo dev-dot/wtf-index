@@ -105,7 +105,7 @@ function render() {
 
   const it = ITEMS[current], worst = r[r.length - 1], best = r[0];
   const oldN = r.filter(x => x.e.old).length;
-  $("summary").innerHTML = "<h1>" + it.title + '-Index</h1><div class="spec">' + it.spec + "</div>" +
+  $("summary").innerHTML = "<h1>" + (it.emoji ? '<span class="emo" aria-hidden="true">' + it.emoji + "</span> " : "") + it.title + '-Index</h1><div class="spec">' + it.spec + "</div>" +
     (r.length
       ? '<div class="stats"><div class="stat"><span>Günstigst</span><b>' + fmt(best.e.price) + '</b></div><div class="stat"><span>Median</span><b>' + fmt(med) +
         '</b></div><div class="stat"><span>Teuerst</span><b>' + fmt(worst.e.price) + "</b></div></div>" +
@@ -153,7 +153,7 @@ function setItem(it) {
 
 /* ---------- Bedienung ---------- */
 $("switch").innerHTML = Object.entries(ITEMS).map(([k, v]) =>
-  '<button type="button" class="chip" data-it="' + k + '" aria-pressed="false"><b>' + v.label + "</b><small>" + v.chip + "</small></button>").join("");
+  '<button type="button" class="chip" data-it="' + k + '" aria-pressed="false"><b>' + (v.emoji ? '<span class="emo" aria-hidden="true">' + v.emoji + "</span> " : "") + v.label + "</b><small>" + v.chip + "</small></button>").join("");
 $("switch").addEventListener("click", e => { const c = e.target.closest(".chip"); if (c) setItem(c.dataset.it); });
 window.addEventListener("hashchange", () => { const h = location.hash.slice(1); if (ITEMS[h] && h !== current) setItem(h); });
 $("list").addEventListener("click", e => { const r = e.target.closest(".row"); if (r) select(r.dataset.id, true); });

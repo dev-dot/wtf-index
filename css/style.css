@@ -152,3 +152,5 @@ button,input,select,textarea{font:inherit;color:inherit}
   .legend-note{display:none}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.emo{font-style:normal;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
+.logo{white-space:nowrap}
