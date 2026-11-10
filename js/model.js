@@ -11,7 +11,7 @@ export const ITEMS = {
   bier:     { emoji: "🍺", label: "Bier 0,5",    chip: "0,5 l",      title: "Bier 0,5 l",           spec: "Pils, Helles oder Export · vom Fass, sonst Flasche · kein Weizen" },
   doener:   { emoji: "🥙", label: "Döner",       chip: "im Brot",    title: "Döner",                spec: "Döner im Brot, normal, ohne Extras" },
   pizza:    { emoji: "🍕", label: "Margherita",  chip: "Pizza",      title: "Pizza Margherita",     spec: "Standardgröße laut Karte, nur Pizzerien" },
-  spaetzle: { label: "Käsespätzle", chip: "schwäbisch", title: "Käsespätzle",          spec: "Hauptgericht-Portion" },
+  spaetzle: { emoji: "🧀", label: "Käsespätzle", chip: "schwäbisch", title: "Käsespätzle",          spec: "Hauptgericht-Portion" },
 };
 export const ITEM_KEYS = Object.keys(ITEMS);
 export const isBeer = it => it === "bier" || it === "bier3";
