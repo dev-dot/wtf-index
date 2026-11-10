@@ -73,7 +73,8 @@ function popupHtml(v) {
       rep.map(r => fmt(r.price) + " am " + fmtDate(r.createdAt) + (r.note ? " – „" + esc(r.note) + "“" : "")).join("<br>") + "</div>" : "") +
     '<div class="reports">' + (v.prices[current] && v.prices[current].sourceUrl ? '<a href="' + esc(v.prices[current].sourceUrl) + '" target="_blank" rel="noopener">Quelle: ' + esc(v.prices[current].sourceLabel || "Link") + " ↗</a><br>" : "") +
     (osm ? '<a href="' + osm + '" target="_blank" rel="noopener">In OpenStreetMap ansehen ↗</a>' : "") + "</div>" +
-    '<button type="button" data-report="' + v.id + '">Preis für ' + ITEMS[current].label + " melden</button></div>";
+    '<button type="button" data-report="' + v.id + '">Preis für ' + ITEMS[current].label + " melden</button>" +
+    '<button type="button" class="menu-link" data-menu="' + v.id + '">Ganze Speisekarte schicken</button></div>';
 }
 function addPin(v, html, title, z) {
   if (!v.location) return;
@@ -162,42 +163,116 @@ $("list").addEventListener("keydown", e => {
 });
 $("map").addEventListener("click", e => { const b = e.target.closest("[data-report]"); if (b) openSheet(b.dataset.report, current); });
 
-/* ---------- Preis melden ---------- */
+/* ---------- Preis melden / Speisekarte schicken ---------- */
 const fVenue = $("fVenue"), fItem = $("fItem"), fPrice = $("fPrice"), fNote = $("fNote"), fMsg = $("fMsg"), fSubmit = $("fSubmit");
+const NEW_VENUE = "__new";
+const MAX_FILES = 5, MAX_BYTES = 10 * 1024 * 1024;
+const FILE_TYPES = ["application/pdf", "image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"];
+let mode = "price";
+
 function showMsg(t, err) { fMsg.hidden = !t; fMsg.textContent = t || ""; fMsg.className = "msg" + (err ? " err" : ""); }
 function syncItem() { $("tapField").hidden = !isBeer(fItem.value); $("fItemHint").textContent = ITEMS[fItem.value].spec; }
 fItem.innerHTML = Object.entries(ITEMS).map(([k, v]) => '<option value="' + k + '">' + v.title + "</option>").join("");
 fItem.addEventListener("change", syncItem);
-function openSheet(vid, it) {
+
+function fillVenueSelect() {
+  const keep = fVenue.value;
+  fVenue.innerHTML = [...VENUES].sort((a, b) => a.name.localeCompare(b.name, "de"))
+    .map(v => '<option value="' + v.id + '">' + esc(v.name) + " (" + esc(v.district) + ")</option>").join("") +
+    (mode === "menu" ? '<option value="' + NEW_VENUE + '">Lokal fehlt in der Liste …</option>' : "");
+  if ([...fVenue.options].some(o => o.value === keep)) fVenue.value = keep;
+  syncVenue();
+}
+function syncVenue() { $("newVenueFields").hidden = !(mode === "menu" && fVenue.value === NEW_VENUE); }
+fVenue.addEventListener("change", syncVenue);
+
+function setMode(m) {
+  mode = m;
+  document.querySelectorAll("#modeSeg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.mode === m));
+  $("modePrice").hidden = m !== "price";
+  $("modeMenu").hidden = m !== "menu";
+  $("sheetTitle").textContent = m === "price" ? "Preis melden" : "Speisekarte schicken";
+  $("sheetLead").textContent = m === "price"
+    ? "Du warst gerade da? Trag ein, was auf der Karte oder der Rechnung stand. Das Team prüft jede Meldung, bevor sie erscheint."
+    : "Lade die Speisekarte als PDF oder Fotos hoch. Das Team liest die Preise aus und trägt sie ein. Die Dateien sieht nur das Team.";
+  fSubmit.textContent = m === "price" ? "Preis melden" : "Speisekarte schicken";
+  fillVenueSelect(); showMsg("");
+}
+$("modeSeg").addEventListener("click", e => { const b = e.target.closest("button"); if (b) setMode(b.dataset.mode); });
+
+function checkFiles() {
+  const files = [...$("mFiles").files];
+  const kb = n => (n < 1024 * 1024 ? Math.max(1, Math.round(n / 1024)) + " KB" : (n / 1024 / 1024).toFixed(1).replace(".", ",") + " MB");
+  const bad = f => !FILE_TYPES.includes(f.type) && !/\.(pdf|jpe?g|png|webp|heic|heif)$/i.test(f.name) || f.size > MAX_BYTES;
+  $("mFileList").innerHTML = files.map(f => '<li class="' + (bad(f) ? "bad" : "") + '"><span>' + esc(f.name) + "</span><span>" + kb(f.size) + "</span></li>").join("");
+  if (files.length > MAX_FILES) return "Bitte höchstens " + MAX_FILES + " Dateien auswählen.";
+  if (files.some(f => f.size > MAX_BYTES)) return "Eine Datei ist größer als 10 MB. Bitte verkleinern oder als einzelne Seiten fotografieren.";
+  if (files.some(bad)) return "Bitte nur PDF- oder Bilddateien (JPG, PNG, WebP, HEIC) hochladen.";
+  return "";
+}
+$("mFiles").addEventListener("change", () => showMsg(checkFiles(), true));
+
+function openSheet(vid, it, m = "price") {
+  setMode(m);
   if (vid) fVenue.value = vid;
+  syncVenue();
   fItem.value = it || current; syncItem();
   const v = VENUES.find(x => x.id === fVenue.value);
   const e = v && effective(v, fItem.value);
   fPrice.value = ""; fPrice.placeholder = e ? "aktuell " + fmtShort(e.price) : "z. B. 5,40"; fNote.value = "";
+  $("mFiles").value = ""; $("mFileList").innerHTML = ""; $("mStand").value = ""; $("mNote").value = ""; $("mConsent").checked = false;
+  $("mVenueName").value = ""; $("mVenueAddress").value = "";
   fSubmit.disabled = !backend; showMsg(backend ? "" : "Meldungen sind gerade nicht verfügbar.", !backend);
-  $("sheetBg").hidden = false; setTimeout(() => fPrice.focus(), 30);
+  $("sheetBg").hidden = false; setTimeout(() => (m === "price" ? fPrice : $("mFiles")).focus(), 30);
 }
 function closeSheet() { $("sheetBg").hidden = true; }
 $("fab").addEventListener("click", () => openSheet(selected, current));
+$("map").addEventListener("click", e => { const b = e.target.closest("[data-menu]"); if (b) openSheet(b.dataset.menu, current, "menu"); });
 $("fCancel").addEventListener("click", closeSheet);
 $("sheetBg").addEventListener("click", e => { if (e.target === $("sheetBg")) closeSheet(); });
 document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("sheetBg").hidden) closeSheet(); });
-$("sheet").addEventListener("submit", async e => {
-  e.preventDefault();
+
+async function submitPrice() {
   const price = parseFloat(String(fPrice.value).replace(",", "."));
   if (!(price >= 0.5 && price <= 60)) { showMsg("Bitte einen Preis zwischen 0,50 € und 60 € eingeben.", true); fPrice.focus(); return; }
   const r = { venueId: fVenue.value, item: fItem.value, price: Math.round(price * 100) / 100 };
   if (isBeer(r.item)) r.tap = $("fTapB").checked ? "b" : "f";
   const note = fNote.value.trim().slice(0, 120); if (note) r.note = note;
   fSubmit.disabled = true; showMsg("Wird gespeichert …");
-  try {
-    await backend.addReport(r);
-    closeSheet();
-    toast("Danke! Deine Meldung wird geprüft und erscheint nach der Freigabe.");
-  } catch (err) {
+  await backend.addReport(r);
+  closeSheet();
+  toast("Danke! Deine Meldung wird geprüft und erscheint nach der Freigabe.");
+}
+
+async function submitMenu() {
+  const files = [...$("mFiles").files];
+  if (!files.length) { showMsg("Bitte mindestens eine Datei auswählen.", true); $("mFiles").focus(); return; }
+  const problem = checkFiles(); if (problem) { showMsg(problem, true); return; }
+  const isNewVenue = fVenue.value === NEW_VENUE;
+  const venueName = $("mVenueName").value.trim(), venueAddress = $("mVenueAddress").value.trim();
+  if (isNewVenue && !venueName) { showMsg("Bitte den Namen des Lokals angeben.", true); $("mVenueName").focus(); return; }
+  if (!$("mConsent").checked) { showMsg("Bitte bestätige, dass auf den Fotos keine Personen zu sehen sind.", true); return; }
+  fSubmit.disabled = true;
+  showMsg(files.length > 1 ? "Lädt " + files.length + " Dateien hoch …" : "Lädt hoch …");
+  await backend.addMenuUpload({
+    venueId: isNewVenue ? null : fVenue.value,
+    venueName: isNewVenue ? venueName : null,
+    venueAddress: isNewVenue ? venueAddress || null : null,
+    stand: $("mStand").value.trim() || null,
+    note: $("mNote").value.trim() || null,
+    files,
+  });
+  closeSheet();
+  toast("Danke! Das Team trägt die Preise aus deiner Speisekarte ein.");
+}
+
+$("sheet").addEventListener("submit", async e => {
+  e.preventDefault();
+  try { await (mode === "price" ? submitPrice() : submitMenu()); }
+  catch (err) {
     console.error(err);
     fSubmit.disabled = false;
-    showMsg("Speichern hat nicht geklappt. Bitte gleich noch einmal versuchen.", true);
+    showMsg(err && err.userMessage ? err.userMessage : "Senden hat nicht geklappt. Bitte gleich noch einmal versuchen.", true);
   }
 });
 let toastT;
@@ -226,8 +301,7 @@ async function boot() {
     const city = L.polygon(b.latlngs, { className: "city", interactive: false }).addTo(map);
     map.fitBounds(city.getBounds(), { padding: [16, 16] });
   }
-  fVenue.innerHTML = [...VENUES].sort((a, b) => a.name.localeCompare(b.name, "de"))
-    .map(v => '<option value="' + v.id + '">' + esc(v.name) + " (" + esc(v.district) + ")</option>").join("");
+  fillVenueSelect();
   $("countTag").textContent = "Beta · " + VENUES.length + " Lokale";
   render();
 }

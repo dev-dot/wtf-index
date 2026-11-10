@@ -40,15 +40,39 @@
 
 <div class="sheet-bg" id="sheetBg" hidden>
   <form class="sheet" id="sheet" novalidate>
-    <h2>Preis melden</h2>
-    <p class="lead">Du warst gerade da? Trag ein, was auf der Karte oder der Rechnung stand. Das Team prüft jede Meldung, bevor sie erscheint.</p>
+    <h2 id="sheetTitle">Preis melden</h2>
+    <div class="seg mode-seg" role="group" aria-label="Was möchtest du schicken?" id="modeSeg">
+      <button type="button" data-mode="price" aria-pressed="true">Einzelner Preis</button>
+      <button type="button" data-mode="menu" aria-pressed="false">Ganze Speisekarte</button>
+    </div>
+    <p class="lead" id="sheetLead">Du warst gerade da? Trag ein, was auf der Karte oder der Rechnung stand. Das Team prüft jede Meldung, bevor sie erscheint.</p>
     <div class="field"><label for="fVenue">Lokal</label><select id="fVenue" required></select></div>
-    <div class="field"><label for="fItem">Index</label><select id="fItem"></select><span class="hint" id="fItemHint"></span></div>
-    <div class="field" id="tapField"><fieldset><legend>Bier</legend>
-      <label><input type="radio" name="tap" id="fTapF" value="f" checked> vom Fass</label>
-      <label><input type="radio" name="tap" id="fTapB" value="b"> Flasche</label></fieldset></div>
-    <div class="field"><label for="fPrice">Preis</label><div class="eur"><input type="number" id="fPrice" inputmode="decimal" min="0.5" max="60" step="0.1" placeholder="z. B. 5,40" required></div></div>
-    <div class="field"><label for="fNote">Notiz (optional)</label><input type="text" id="fNote" maxlength="120" placeholder="z. B. Happy Hour nicht mitgezählt"></div>
+    <div id="newVenueFields" class="sub-fields" hidden>
+      <div class="field"><label for="mVenueName">Name des Lokals</label><input type="text" id="mVenueName" maxlength="80" placeholder="z. B. Pizzeria Beispiel"></div>
+      <div class="field"><label for="mVenueAddress">Adresse oder Stadtteil</label><input type="text" id="mVenueAddress" maxlength="120" placeholder="z. B. Musterstr. 1, West"></div>
+    </div>
+
+    <div id="modePrice">
+      <div class="field"><label for="fItem">Index</label><select id="fItem"></select><span class="hint" id="fItemHint"></span></div>
+      <div class="field" id="tapField"><fieldset><legend>Bier</legend>
+        <label><input type="radio" name="tap" id="fTapF" value="f" checked> vom Fass</label>
+        <label><input type="radio" name="tap" id="fTapB" value="b"> Flasche</label></fieldset></div>
+      <div class="field"><label for="fPrice">Preis</label><div class="eur"><input type="number" id="fPrice" inputmode="decimal" min="0.5" max="60" step="0.1" placeholder="z. B. 5,40"></div></div>
+      <div class="field"><label for="fNote">Notiz (optional)</label><input type="text" id="fNote" maxlength="120" placeholder="z. B. Happy Hour nicht mitgezählt"></div>
+    </div>
+
+    <div id="modeMenu" hidden>
+      <div class="field">
+        <label for="mFiles">Speisekarte</label>
+        <input type="file" id="mFiles" accept="application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif" multiple>
+        <span class="hint">PDF oder Fotos, bis zu 5 Dateien mit je höchstens 10 MB. Mehrere Seiten einfach zusammen auswählen.</span>
+        <ul class="file-list" id="mFileList"></ul>
+      </div>
+      <div class="field"><label for="mStand">Stand der Karte (optional)</label><input type="text" id="mStand" maxlength="40" placeholder="z. B. Herbst 2026 oder heute fotografiert"></div>
+      <div class="field"><label for="mNote">Notiz (optional)</label><input type="text" id="mNote" maxlength="200" placeholder="z. B. Getränkekarte hängt an der Bar"></div>
+      <label class="consent"><input type="checkbox" id="mConsent"> Die Fotos zeigen nur die Speisekarte, keine Personen.</label>
+    </div>
+
     <div class="msg" id="fMsg" hidden></div>
     <div class="actions"><button type="button" class="btn" id="fCancel">Abbrechen</button><button type="submit" class="btn primary" id="fSubmit">Preis melden</button></div>
   </form>

@@ -154,3 +154,19 @@ button,input,select,textarea{font:inherit;color:inherit}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 .emo{font-style:normal;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
 .logo{white-space:nowrap}
+/* Segmente (Karte und Admin) */
+.seg { display: inline-flex; border: 1.5px solid var(--line); border-radius: 8px; overflow: hidden; }
+.seg button { border: 0; background: var(--surface); padding: 7px 14px; cursor: pointer; font-weight: 500; }
+.seg button + button { border-left: 1.5px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
+.mode-seg{display:flex}.mode-seg button{flex:1}
+#modePrice,#modeMenu,.sub-fields{display:grid;gap:14px}
+.sub-fields{padding:12px;border-radius:8px;background:var(--bg)}
+.sub-fields .field input{background:var(--surface)}
+.field input[type=file]{font-size:13px;padding:8px;border:1.5px dashed var(--line);border-radius:6px;background:var(--bg);width:100%;box-sizing:border-box}
+.file-list{list-style:none;margin:0;padding:0;display:grid;gap:4px;font-size:13px}
+.file-list li{display:flex;justify-content:space-between;gap:8px}
+.file-list li span:last-child{color:var(--muted);font-family:var(--f-mono);white-space:nowrap}
+.file-list li.bad span:first-child{color:var(--wtf)}
+.consent{display:flex;gap:8px;align-items:flex-start;font-size:13px}
+.pop .menu-link{display:block;margin-top:6px;text-align:center;font-size:12px;color:var(--muted);background:none;border:0;cursor:pointer;text-decoration:underline;width:100%;padding:0}

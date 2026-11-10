@@ -73,7 +73,40 @@ async function supabaseBackend() {
       return priceFrom(row);
     },
     async deletePrice(id) { must(await sb.from("prices").delete().eq("id", id)); },
+
+    // --- Speisekarten ---
+    async addMenuUpload(u) {
+      const folder = uid(), paths = [];
+      for (const [i, f] of u.files.entries()) {
+        const path = "uploads/" + folder + "/" + (i + 1) + "." + fileExt(f);
+        const { error } = await sb.storage.from("menus").upload(path, f, { contentType: f.type || undefined, upsert: false });
+        if (error) { error.userMessage = "Hochladen hat nicht geklappt (" + (error.message || "Fehler") + "). Bitte noch einmal versuchen."; throw error; }
+        paths.push(path);
+      }
+      must(await sb.from("menu_uploads").insert({
+        venue_id: u.venueId, venue_name: u.venueName, venue_address: u.venueAddress, stand: u.stand, note: u.note,
+        files: paths, file_names: u.files.map(f => f.name.slice(0, 120)),
+      }));
+    },
+    async listMenuUploads(status) {
+      return must(await sb.from("menu_uploads").select("*").eq("status", status).order("created_at", { ascending: false }).limit(200)).map(menuFrom);
+    },
+    async setMenuUploadStatus(id, status) {
+      const user = await this.getUser();
+      must(await sb.from("menu_uploads").update({ status, reviewed_at: new Date().toISOString(), reviewed_by: user ? user.id : null }).eq("id", id));
+    },
+    async fileUrl(path) { return must(await sb.storage.from("menus").createSignedUrl(path, 600)).signedUrl; },
   };
+}
+
+const menuFrom = r => ({
+  id: r.id, venueId: r.venue_id, venueName: r.venue_name, venueAddress: r.venue_address, stand: r.stand, note: r.note,
+  files: r.files || [], fileNames: r.file_names || [], status: r.status, createdAt: Date.parse(r.created_at),
+});
+function fileExt(f) {
+  const m = /\.([a-z0-9]{2,5})$/i.exec(f.name);
+  if (m) return m[1].toLowerCase();
+  return ({ "application/pdf": "pdf", "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/heic": "heic" })[f.type] || "bin";
 }
 
 /* ---------------- Lokal (ohne Server) ---------------- */
@@ -87,6 +120,7 @@ async function localBackend() {
   const base = fromJson(json);
   // Überlagerung: geänderte/neue Lokale, zusätzliche Preise, gelöschte Preis-IDs, Meldungen
   let db = readLocal() || { venues: {}, prices: [], deleted: [], reports: [] };
+  db.menus = db.menus || []; db.files = db.files || {};
   const save = () => writeLocal(db);
   const all = () => {
     const venues = base.venues.filter(v => !db.venues[v.id]).concat(Object.values(db.venues));
@@ -123,9 +157,31 @@ async function localBackend() {
       if (i >= 0) db.prices.splice(i, 1); else db.deleted.push(id);
       save();
     },
+    // Speisekarten: lokal als data:-URL gespeichert, daher nur kleine Dateien
+    async addMenuUpload(u) {
+      const total = u.files.reduce((s, f) => s + f.size, 0);
+      if (total > 3 * 1024 * 1024) {
+        const e = new Error("too large"); e.userMessage = "Im lokalen Modus gehen nur Dateien bis zusammen 3 MB. Mit Supabase sind es 10 MB pro Datei."; throw e;
+      }
+      const id = uid(), paths = [];
+      for (const [i, f] of u.files.entries()) {
+        const path = "local/" + id + "/" + (i + 1);
+        db.files[path] = await new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(f); });
+        paths.push(path);
+      }
+      const { files, ...rest } = u;
+      db.menus.unshift({ ...rest, id, files: paths, fileNames: files.map(f => f.name), status: "pending", createdAt: Date.now() });
+      save();
+      if (!localStorage.getItem(LOCAL_KEY) || !localStorage.getItem(LOCAL_KEY).includes(id)) {
+        const e = new Error("quota"); e.userMessage = "Der Browser-Speicher ist voll. Im lokalen Modus bitte kleinere Dateien wählen."; throw e;
+      }
+    },
+    async listMenuUploads(status) { return db.menus.filter(m => m.status === status); },
+    async setMenuUploadStatus(id, status) { const m = db.menus.find(x => x.id === id); if (m) { m.status = status; save(); } },
+    async fileUrl(path) { return db.files[path] || null; },
     // Nur lokal: Stand als venues.json exportieren bzw. Änderungen verwerfen
     exportJson() { const { venues, prices } = all(); return toJson(venues, prices); },
     hasChanges() { return Object.keys(db.venues).length + db.prices.length + db.deleted.length > 0; },
-    resetChanges() { db = { venues: {}, prices: [], deleted: [], reports: db.reports }; save(); },
+    resetChanges() { db = { venues: {}, prices: [], deleted: [], reports: db.reports, menus: db.menus, files: db.files }; save(); },
   };
 }

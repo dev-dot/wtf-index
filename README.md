@@ -58,6 +58,7 @@ Ohne Supabase läuft alles im **lokalen Modus**: Startdaten kommen aus `data/ven
 `admin.html` (nicht verlinkt, `noindex`):
 
 - **Meldungen:** offene Besucher-Meldungen mit Vergleich zum aktuellen Preis freigeben oder ablehnen
+- **Speisekarten:** von Besuchern hochgeladene Karten (PDF/Fotos) ansehen, Preise eintragen, als erledigt markieren. Fehlt das Lokal noch, lässt es sich direkt anlegen.
 - **Lokale:** anlegen und bearbeiten, Standort per Adresssuche (OpenStreetMap Nominatim) oder Klick in die Karte setzen, Lokale ausblenden
 - **Preise:** neuen Preis mit Quelle, Datum der Karte und Hinweis eintragen. Alte Preise bleiben als Verlauf erhalten, der neueste zählt.
 
@@ -105,5 +106,5 @@ Im Betrieb über den Admin-Bereich. Im lokalen Modus stehen die Startdaten in `d
 ## Offen
 
 - Preisverlauf öffentlich anzeigen (Daten sind schon da)
-- Hochladen von Speisekarten-PDFs im Admin-Bereich
+- Preise aus hochgeladenen Speisekarten automatisch vorschlagen
 - Impressum und Datenschutzerklärung (vor dem öffentlichen Start Pflicht)

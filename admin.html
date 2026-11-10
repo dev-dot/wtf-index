@@ -19,6 +19,7 @@
   </div>
   <nav class="admin-nav" aria-label="Bereiche" id="tabs" hidden>
     <button type="button" class="chip" data-tab="reports" aria-pressed="true"><b>Meldungen</b><small id="pendingCount">–</small></button>
+    <button type="button" class="chip" data-tab="menus" aria-pressed="false"><b>Speisekarten</b><small id="menuCount">–</small></button>
     <button type="button" class="chip" data-tab="venues" aria-pressed="false"><b>Lokale</b><small id="venueCount">–</small></button>
   </nav>
   <div class="admin-actions">
@@ -71,6 +72,21 @@
       </table>
     </div>
     <p class="empty" id="reportsEmpty" hidden>Keine Meldungen in dieser Ansicht.</p>
+  </section>
+
+  <!-- Speisekarten -->
+  <section id="menusView" hidden>
+    <div class="view-head">
+      <h1>Eingereichte Speisekarten</h1>
+      <div class="seg" id="menuSeg">
+        <button type="button" data-status="pending" aria-pressed="true">Offen</button>
+        <button type="button" data-status="done" aria-pressed="false">Erledigt</button>
+        <button type="button" data-status="rejected" aria-pressed="false">Abgelehnt</button>
+      </div>
+    </div>
+    <p class="muted">Preise auslesen und unter „Lokale“ eintragen, dann auf „Erledigt“ setzen. Die Dateien sind privat und nur hier sichtbar.</p>
+    <div class="menu-cards" id="menuCards"></div>
+    <p class="empty" id="menusEmpty" hidden>Keine Speisekarten in dieser Ansicht.</p>
   </section>
 
   <!-- Lokale -->

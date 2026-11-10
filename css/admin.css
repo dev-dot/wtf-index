@@ -48,11 +48,6 @@ code { font-family: var(--f-mono); font-size: .92em; background: var(--bg); padd
 .pick-pin { position: absolute; width: 22px; height: 22px; transform: translate(-50%, -100%); border-radius: 50% 50% 50% 0; rotate: -45deg; background: var(--wtf); border: 2px solid var(--surface); box-shadow: var(--shadow); cursor: grab; }
 .actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
 
-/* Segmente */
-.seg { display: inline-flex; border: 1.5px solid var(--line); border-radius: 8px; overflow: hidden; }
-.seg button { border: 0; background: var(--surface); padding: 7px 14px; cursor: pointer; font-weight: 500; }
-.seg button + button { border-left: 1.5px solid var(--line); }
-.seg button[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
 
 /* Tabelle */
 .table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
@@ -103,3 +98,14 @@ code { font-family: var(--f-mono); font-size: .92em; background: var(--bg); padd
   .grid2, .price-form .grid3 { grid-template-columns: 1fr; }
   .admin-actions { margin-left: 0; }
 }
+
+/* Speisekarten */
+.menu-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap: 14px; margin-top: 14px; }
+.menu-card { display: grid; gap: 10px; align-content: start; }
+.menu-card h3 { margin: 0; font-size: 16px; }
+.menu-card .meta { color: var(--muted); font-size: 13px; }
+.menu-card .new-tag { display: inline-block; font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--meh); border: 1px solid var(--meh); border-radius: 3px; padding: 0 4px; margin-left: 4px; }
+.menu-files { display: flex; flex-wrap: wrap; gap: 8px; }
+.menu-files a { display: grid; place-items: center; width: 88px; height: 88px; border: 1.5px solid var(--line); border-radius: 6px; background: var(--bg); overflow: hidden; color: var(--ink); text-decoration: none; font-size: 12px; font-weight: 600; text-align: center; }
+.menu-files a img { width: 100%; height: 100%; object-fit: cover; }
+.menu-card .acts { display: flex; flex-wrap: wrap; gap: 6px; }

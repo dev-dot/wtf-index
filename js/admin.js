@@ -32,7 +32,7 @@ async function boot() {
 
 async function route() {
   const user = await backend.getUser();
-  ["loginView", "noAdminView", "reportsView", "venuesView"].forEach(id => ($(id).hidden = true));
+  ["loginView", "noAdminView", "reportsView", "menusView", "venuesView"].forEach(id => ($(id).hidden = true));
   $("tabs").hidden = true;
   $("logout").hidden = !user || backend.mode === "local";
   $("who").textContent = backend.mode === "local" ? "Lokaler Modus" : user ? user.email : "Nicht angemeldet";
@@ -64,6 +64,10 @@ async function reload() {
   $("venueCount").textContent = venues.length + " Lokale";
   const pending = await backend.listReports("pending");
   $("pendingCount").textContent = pending.length ? pending.length + " offen" : "keine offen";
+  try {
+    const menus = await backend.listMenuUploads("pending");
+    $("menuCount").textContent = menus.length ? menus.length + " offen" : "keine offen";
+  } catch { $("menuCount").textContent = "nicht eingerichtet"; }
 }
 
 function showTab(t) {
@@ -71,7 +75,9 @@ function showTab(t) {
   document.querySelectorAll("#tabs .chip").forEach(c => c.setAttribute("aria-pressed", c.dataset.tab === t));
   $("reportsView").hidden = t !== "reports";
   $("venuesView").hidden = t !== "venues";
+  $("menusView").hidden = t !== "menus";
   if (t === "reports") renderReports();
+  else if (t === "menus") renderMenus();
   else { renderVenueList(); if (pickMap) setTimeout(() => pickMap.invalidateSize(), 0); }
 }
 $("tabs").addEventListener("click", e => { const c = e.target.closest(".chip"); if (c) showTab(c.dataset.tab); });
@@ -115,6 +121,81 @@ $("reportRows").addEventListener("click", async e => {
     toast(b.dataset.act === "approved" ? "Freigegeben: erscheint jetzt auf der Karte." : b.dataset.act === "rejected" ? "Abgelehnt." : "Zurück in „Offen“.");
     await reload(); renderReports();
   } catch (err) { b.disabled = false; toast("Hat nicht geklappt: " + errText(err)); }
+});
+
+/* ---------- Speisekarten ---------- */
+let menuStatus = "pending";
+const objectUrls = [];
+async function viewUrl(path) {
+  const url = await backend.fileUrl(path);
+  if (url && url.startsWith("data:")) { const u = URL.createObjectURL(await (await fetch(url)).blob()); objectUrls.push(u); return u; }
+  return url;
+}
+async function renderMenus() {
+  const box = $("menuCards");
+  box.innerHTML = '<p class="muted">Lädt …</p>';
+  let list;
+  try { list = await backend.listMenuUploads(menuStatus); }
+  catch (e) {
+    box.innerHTML = '<p class="card">Speisekarten lassen sich noch nicht laden (' + esc(errText(e)) + "). Ist die Migration <code>supabase/migrations/2026-11-11_menu_uploads.sql</code> ausgeführt?</p>";
+    return;
+  }
+  objectUrls.splice(0).forEach(u => URL.revokeObjectURL(u));
+  $("menusEmpty").hidden = list.length > 0;
+  box.innerHTML = list.map(m => {
+    const known = m.venueId && venues.find(v => v.id === m.venueId);
+    const title = known ? esc(known.name) : esc(m.venueName || m.venueId || "Unbekanntes Lokal") + '<span class="new-tag">neu</span>';
+    const acts = menuStatus === "pending"
+      ? '<button type="button" class="btn small ok" data-mstatus="done" data-id="' + m.id + '">Erledigt</button><button type="button" class="btn small bad" data-mstatus="rejected" data-id="' + m.id + '">Ablehnen</button>'
+      : '<button type="button" class="btn small" data-mstatus="pending" data-id="' + m.id + '">Zurück zu offen</button>';
+    const open = known ? '<button type="button" class="btn small" data-open="' + esc(m.venueId) + '">Preise eintragen</button>'
+      : '<button type="button" class="btn small" data-create="' + m.id + '">Als Lokal anlegen</button>';
+    return '<article class="card menu-card" data-id="' + m.id + '"><div><h3>' + title + '</h3><div class="meta">' +
+      esc([fmtTs(m.createdAt), !known && m.venueAddress, m.stand && "Stand: " + m.stand].filter(Boolean).join(" · ")) + "</div></div>" +
+      (m.note ? "<div>" + esc(m.note) + "</div>" : "") +
+      '<div class="menu-files">' + m.files.map((p, i) => '<a href="#" data-file="' + esc(p) + '" target="_blank" rel="noopener" title="' + esc(m.fileNames[i] || "") + '">' +
+        (/\.pdf$/i.test(m.fileNames[i] || p) ? "PDF<br>" + (i + 1) : "Seite " + (i + 1)) + "</a>").join("") + "</div>" +
+      '<div class="acts">' + open + acts + "</div></article>";
+  }).join("");
+  // Dateien: kurzlebige Links (Supabase) bzw. lokale Blob-Links nachladen; Bilder als Vorschau
+  for (const a of box.querySelectorAll("a[data-file]")) {
+    try {
+      const url = await viewUrl(a.dataset.file);
+      if (!url) { a.textContent = "fehlt"; continue; }
+      a.href = url;
+      if (!/^PDF/.test(a.textContent)) a.innerHTML = '<img src="' + esc(url) + '" alt="' + esc(a.title || "Speisekarte") + '" loading="lazy">';
+    } catch { a.textContent = "Fehler"; }
+  }
+}
+$("menuSeg").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  menuStatus = b.dataset.status;
+  document.querySelectorAll("#menuSeg button").forEach(x => x.setAttribute("aria-pressed", x === b));
+  renderMenus();
+});
+$("menuCards").addEventListener("click", async e => {
+  const a = e.target.closest("a[data-file]");
+  if (a && a.getAttribute("href") === "#") { e.preventDefault(); return; }
+  const st = e.target.closest("[data-mstatus]");
+  if (st) {
+    st.disabled = true;
+    try {
+      await backend.setMenuUploadStatus(st.dataset.id, st.dataset.mstatus);
+      toast(st.dataset.mstatus === "done" ? "Als erledigt markiert." : st.dataset.mstatus === "rejected" ? "Abgelehnt." : "Zurück in „Offen“.");
+      await reload(); renderMenus();
+    } catch (err) { st.disabled = false; toast("Hat nicht geklappt: " + errText(err)); }
+    return;
+  }
+  const op = e.target.closest("[data-open]");
+  if (op) { showTab("venues"); openVenue(op.dataset.open); return; }
+  const cr = e.target.closest("[data-create]");
+  if (cr) {
+    const m = (await backend.listMenuUploads(menuStatus)).find(x => x.id === cr.dataset.create);
+    showTab("venues");
+    isNew = true;
+    editing = { id: "", name: m ? m.venueName || "" : "", type: "Restaurant", district: "", address: m ? m.venueAddress || "" : "", location: null, notes: {}, wanted: [], active: true };
+    fillVenueForm(); renderVenueList(); $("vName").focus();
+  }
 });
 
 /* ---------- Lokale: Liste ---------- */
