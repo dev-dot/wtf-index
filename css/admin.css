@@ -1,0 +1,105 @@
+/* Admin-Bereich: baut auf den Tokens aus style.css auf. */
+html:has(body.admin) { height: auto; }
+body.admin { display: block; height: auto; min-height: 100%; }
+.admin .top { position: sticky; }
+.admin-nav { display: flex; gap: 6px; }
+.admin-actions { display: flex; gap: 8px; margin-left: auto; align-items: center; }
+a.btn { text-decoration: none; color: inherit; display: inline-flex; align-items: center; }
+.btn.small { padding: 4px 10px; font-size: 13px; }
+.btn.ok { background: var(--fair); border-color: var(--fair); color: var(--pin-ink); }
+.btn.bad { color: var(--wtf); border-color: var(--wtf); }
+.muted { color: var(--muted); font-size: 13px; font-weight: 400; }
+code { font-family: var(--f-mono); font-size: .92em; background: var(--bg); padding: 1px 4px; border-radius: 3px; }
+
+.banner {
+  background: var(--brand); color: var(--brand-ink);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 10px;
+  display: flex; flex-wrap: wrap; gap: 10px 20px; align-items: center; justify-content: space-between;
+}
+.banner p { margin: 0; max-width: 75ch; font-size: 14px; }
+.banner code { background: rgba(0,0,0,.08); color: inherit; }
+.banner .btn { border-color: var(--brand-ink); }
+.banner .btn.primary { background: var(--brand-ink); color: var(--brand); }
+.banner-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.admin-main {
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 20px 48px;
+  max-width: 1280px; margin: 0 auto;
+}
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px; }
+.admin h1 { font-family: var(--f-display); font-weight: 800; letter-spacing: -.02em; font-size: 26px; margin: 0; }
+.admin h2 { font-family: var(--f-display); font-weight: 800; letter-spacing: -.01em; font-size: 20px; margin: 0; }
+.view-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px; margin-bottom: 14px; }
+.empty { color: var(--muted); padding: 24px 0; }
+
+.login { max-width: 380px; margin: 40px auto; display: grid; gap: 8px; }
+.form { display: grid; gap: 14px; }
+.field { display: grid; gap: 4px; min-width: 0; }
+.field label, .field .label { font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.field input, .field select, .field textarea {
+  border: 1.5px solid var(--line); background: var(--bg); border-radius: 6px; padding: 8px 10px; width: 100%; min-width: 0;
+}
+.field .hint, .hint { font-size: 12px; color: var(--muted); }
+.inline { display: flex; gap: 8px; }
+.inline input { flex: 1; }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.checks { display: flex; flex-wrap: wrap; gap: 6px 16px; }
+.check, .field .check { display: inline-flex; white-space: nowrap; gap: 6px; align-items: center; font-size: 14px; font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--ink); }
+.pick-pin { position: absolute; width: 22px; height: 22px; transform: translate(-50%, -100%); border-radius: 50% 50% 50% 0; rotate: -45deg; background: var(--wtf); border: 2px solid var(--surface); box-shadow: var(--shadow); cursor: grab; }
+.actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+
+/* Segmente */
+.seg { display: inline-flex; border: 1.5px solid var(--line); border-radius: 8px; overflow: hidden; }
+.seg button { border: 0; background: var(--surface); padding: 7px 14px; cursor: pointer; font-weight: 500; }
+.seg button + button { border-left: 1.5px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
+
+/* Tabelle */
+.table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
+.tbl th { text-align: left; font-size: 11px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.tbl td { padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.tbl tr:last-child td { border-bottom: 0; }
+.tbl .num { text-align: right; font-family: var(--f-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tbl .acts { white-space: nowrap; text-align: right; }
+.tbl .acts .btn + .btn { margin-left: 6px; }
+.diff { display: block; font-size: 11px; }
+.diff.up { color: var(--wtf); } .diff.down { color: var(--fair); }
+
+/* Lokale */
+.venues-layout { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 18px; align-items: start; }
+.venue-list { padding: 0; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 84px); max-height: calc(100vh - 110px); display: flex; flex-direction: column; }
+.venue-list-head { padding: 12px; display: grid; gap: 8px; border-bottom: 1px solid var(--line); }
+.venue-list-head input { border: 1.5px solid var(--line); background: var(--bg); border-radius: 6px; padding: 8px 10px; width: 100%; }
+#venueList { list-style: none; margin: 0; padding: 4px 0; overflow: auto; }
+#venueList li { padding: 9px 14px; cursor: pointer; border-left: 4px solid transparent; display: grid; gap: 1px; }
+#venueList li:hover, #venueList li.active { background: var(--bg); }
+#venueList li.active { border-left-color: var(--ink); }
+#venueList li b { font-weight: 600; }
+#venueList li small { color: var(--muted); font-size: 12px; }
+#venueList li.inactive b { text-decoration: line-through; color: var(--muted); }
+.venue-editor { display: grid; gap: 18px; min-width: 0; }
+.pick-map { height: 260px; border-radius: 8px; border: 1.5px solid var(--line); background: var(--map-bg); }
+
+/* Preise je Index */
+.item-row { border-top: 1px solid var(--line); padding: 14px 0; display: grid; gap: 8px; }
+.item-row:first-child { border-top: 0; padding-top: 0; }
+.item-head { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline; }
+.item-head b { font-size: 15px; }
+.item-head .cur { font-family: var(--f-mono); font-weight: 600; font-size: 16px; }
+.item-head .btn { margin-left: auto; }
+.hist { list-style: none; margin: 0; padding: 0; font-size: 13px; color: var(--muted); display: grid; gap: 4px; }
+.hist li { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.hist li .p { font-family: var(--f-mono); color: var(--ink); min-width: 64px; }
+.hist li.current .p { font-weight: 700; }
+.hist button { border: 0; background: none; color: var(--wtf); cursor: pointer; font-size: 12px; padding: 0; margin-left: auto; }
+.price-form { background: var(--bg); border-radius: 8px; padding: 12px; display: grid; gap: 10px; }
+.price-form .grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.price-form .field input, .price-form .field select { background: var(--surface); }
+
+@media (max-width: 900px) {
+  .venues-layout { grid-template-columns: 1fr; }
+  .venue-list { position: static; max-height: 320px; }
+  .grid2, .price-form .grid3 { grid-template-columns: 1fr; }
+  .admin-actions { margin-left: 0; }
+}

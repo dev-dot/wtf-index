@@ -1,0 +1,10 @@
+{
+  "name": "wtf-index",
+  "private": true,
+  "type": "module",
+  "description": "WTF-Index: Gastro-Preise in Stuttgart auf einer Karte",
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "seed": "node scripts/make-seed.mjs"
+  }
+}

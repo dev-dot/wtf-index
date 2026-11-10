@@ -1,30 +1,18 @@
 import { CONFIG } from "./config.js";
-import { createStore } from "./store.js";
+import { createBackend } from "./backend.js";
+import { ITEMS, isBeer, currentPrices, fmt, fmtShort, esc } from "./model.js";
 
-/* ---------- Indizes & Regeln ---------- */
-const ITEMS = {
-  wasser:   { label: "Wasser",      chip: "0,75 l", title: "Große Flasche Wasser", spec: "Mineral- oder Tafelwasser, Flasche 0,75 l" },
-  bier3:    { label: "Bier 0,3",    chip: "0,3 l",  title: "Kleines Bier 0,3 l",   spec: "Pils, Helles oder Export · 0,3 oder 0,33 l · vom Fass, sonst Flasche · kein Weizen" },
-  bier:     { label: "Bier 0,5",    chip: "0,5 l",  title: "Bier 0,5 l",           spec: "Pils, Helles oder Export · vom Fass, sonst Flasche · kein Weizen" },
-  doener:   { label: "Döner",       chip: "im Brot",title: "Döner",                spec: "Döner im Brot, normal, ohne Extras" },
-  pizza:    { label: "Margherita",  chip: "Pizza",  title: "Pizza Margherita",     spec: "Standardgröße laut Karte, nur Pizzerien" },
-  spaetzle: { label: "Käsespätzle", chip: "schwäbisch", title: "Käsespätzle",      spec: "Hauptgericht-Portion" },
-};
 const DRINKS = { wasser: 1, bier3: 1, bier: 1 };
-const isBeer = it => it === "bier" || it === "bier3";
 
 /* ---------- State ---------- */
 let VENUES = [];
 let reports = [];
-let store = null;
+let backend = null;
 let current = ITEMS[location.hash.slice(1)] ? location.hash.slice(1) : "doener";
 let selected = null;
 
 const $ = id => document.getElementById(id);
-const fmt = n => n.toFixed(2).replace(".", ",") + " €";
-const fmtShort = n => n.toFixed(2).replace(".", ",");
 const fmtDate = ts => new Date(ts).toLocaleDateString("de-DE", { day: "numeric", month: "short" });
-const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
 /* ---------- Preislogik ---------- */
 function reportsFor(vid, it) {
@@ -33,11 +21,11 @@ function reportsFor(vid, it) {
 function effective(v, it) {
   if (it === "pizza" && v.type !== "Pizzeria") return null; // Pizza-Index: nur Pizzerien
   const menu = v.prices[it];
-  const menuTs = new Date(v.source.date + "T12:00:00").getTime();
+  const menuTs = menu ? Date.parse(menu.validFrom + "T12:00:00") : 0;
   const r = reportsFor(v.id, it)[0];
   if (r && (!menu || r.createdAt >= menuTs)) return { price: r.price, src: "crowd", ts: r.createdAt, tap: r.tap, note: r.note };
   if (!menu) return null;
-  return { price: menu.price, src: "menu", ts: menuTs, tap: menu.tap, old: !!v.source.outdated, note: v.notes[it] };
+  return { price: menu.price, src: "menu", ts: menuTs, tap: menu.tap, old: !!menu.outdated, note: menu.note, p: menu };
 }
 function median(a) {
   const s = [...a].sort((x, y) => x - y), m = s.length >> 1;
@@ -57,7 +45,8 @@ function rows() {
 function tapLabel(e, sep) { return e.tap === "b" ? sep + "Flasche" : e.tap === "f" ? sep + "Fass" : ""; }
 function srcLabel(v, e, sep) {
   if (e.src === "crowd") return '<span class="src crowd">Besucher-Meldung' + sep + fmtDate(e.ts) + "</span>";
-  return '<span class="src">' + esc(v.source.label || "") + sep + "Stand " + esc(v.source.stand || "") +
+  const stand = e.p.standLabel || new Date(e.ts).toLocaleDateString("de-DE", { month: "2-digit", year: "numeric" });
+  return '<span class="src">' + esc(e.p.sourceLabel || "Quelle unbekannt") + sep + "Stand " + esc(stand) +
     (e.old ? ' <span class="old">alte Karte</span>' : "") + "</span>";
 }
 
@@ -82,7 +71,7 @@ function popupHtml(v) {
     (hasCur ? "" : '<div class="reports">' + (v.notes[current] ? esc(v.notes[current]) : "Noch kein Preis für " + ITEMS[current].title + ".") + "</div>") +
     (rep.length ? '<div class="reports"><b>Letzte Meldungen · ' + ITEMS[current].title + "</b>" +
       rep.map(r => fmt(r.price) + " am " + fmtDate(r.createdAt) + (r.note ? " – „" + esc(r.note) + "“" : "")).join("<br>") + "</div>" : "") +
-    '<div class="reports">' + (v.source.url ? '<a href="' + esc(v.source.url) + '" target="_blank" rel="noopener">Speisekarte bei ' + esc(v.source.label) + " ↗</a><br>" : "") +
+    '<div class="reports">' + (v.prices[current] && v.prices[current].sourceUrl ? '<a href="' + esc(v.prices[current].sourceUrl) + '" target="_blank" rel="noopener">Quelle: ' + esc(v.prices[current].sourceLabel || "Link") + " ↗</a><br>" : "") +
     (osm ? '<a href="' + osm + '" target="_blank" rel="noopener">In OpenStreetMap ansehen ↗</a>' : "") + "</div>" +
     '<button type="button" data-report="' + v.id + '">Preis für ' + ITEMS[current].label + " melden</button></div>";
 }
@@ -185,7 +174,7 @@ function openSheet(vid, it) {
   const v = VENUES.find(x => x.id === fVenue.value);
   const e = v && effective(v, fItem.value);
   fPrice.value = ""; fPrice.placeholder = e ? "aktuell " + fmtShort(e.price) : "z. B. 5,40"; fNote.value = "";
-  fSubmit.disabled = !store; showMsg(store ? "" : "Meldungen sind gerade nicht verfügbar.", !store);
+  fSubmit.disabled = !backend; showMsg(backend ? "" : "Meldungen sind gerade nicht verfügbar.", !backend);
   $("sheetBg").hidden = false; setTimeout(() => fPrice.focus(), 30);
 }
 function closeSheet() { $("sheetBg").hidden = true; }
@@ -202,13 +191,9 @@ $("sheet").addEventListener("submit", async e => {
   const note = fNote.value.trim().slice(0, 120); if (note) r.note = note;
   fSubmit.disabled = true; showMsg("Wird gespeichert …");
   try {
-    const res = await store.add(r);
+    await backend.addReport(r);
     closeSheet();
-    if (res.pending) { toast("Danke! Deine Meldung wird geprüft und erscheint nach der Freigabe."); return; }
-    reports = await store.list();
-    toast("Danke! Dein Preis ist jetzt auf der Karte (Demo-Modus, nur in deinem Browser).");
-    if (r.item !== current) setItem(r.item); else render();
-    select(r.venueId, true);
+    toast("Danke! Deine Meldung wird geprüft und erscheint nach der Freigabe.");
   } catch (err) {
     console.error(err);
     fSubmit.disabled = false;
@@ -220,27 +205,30 @@ function toast(t) { const el = $("toast"); el.textContent = t; el.hidden = false
 
 /* ---------- Start ---------- */
 async function boot() {
-  const [vData, boundary] = await Promise.all([
-    fetch("data/venues.json").then(r => r.json()),
-    fetch("data/stuttgart-boundary.json").then(r => r.json()).catch(() => null),
-  ]);
-  VENUES = vData.venues;
-  if (boundary) {
-    const city = L.polygon(boundary.latlngs, { className: "city", interactive: false }).addTo(map);
+  const boundary = fetch("data/stuttgart-boundary.json").then(r => r.json()).catch(() => null);
+  try {
+    backend = await createBackend();
+    const data = await backend.loadAll();
+    const cur = currentPrices(data.prices);
+    VENUES = data.venues.map(v => {
+      const prices = {};
+      for (const it of Object.keys(ITEMS)) if (cur[v.id + "|" + it]) prices[it] = cur[v.id + "|" + it];
+      return { ...v, prices };
+    });
+    reports = data.reports.filter(r => VENUES.some(v => v.id === r.venueId) && ITEMS[r.item] && r.price >= 0.5 && r.price <= 60);
+    if (backend.mode === "local") $("foot").insertAdjacentHTML("beforeend", "<p>Lokaler Modus: Meldungen bleiben in diesem Browser und erscheinen nach Freigabe unter admin.html.</p>");
+  } catch (err) {
+    console.error(err);
+    $("foot").insertAdjacentHTML("beforeend", "<p>Die Daten sind gerade nicht erreichbar. Bitte später noch einmal versuchen.</p>");
+  }
+  const b = await boundary;
+  if (b) {
+    const city = L.polygon(b.latlngs, { className: "city", interactive: false }).addTo(map);
     map.fitBounds(city.getBounds(), { padding: [16, 16] });
   }
   fVenue.innerHTML = [...VENUES].sort((a, b) => a.name.localeCompare(b.name, "de"))
     .map(v => '<option value="' + v.id + '">' + esc(v.name) + " (" + esc(v.district) + ")</option>").join("");
   $("countTag").textContent = "Beta · " + VENUES.length + " Lokale";
   render();
-  try {
-    store = await createStore();
-    reports = (await store.list()).filter(r => VENUES.some(v => v.id === r.venueId) && ITEMS[r.item] && r.price >= 0.5 && r.price <= 60);
-    if (store.mode === "local") $("foot").insertAdjacentHTML("beforeend", "<p>Demo-Modus: Meldungen werden nur in diesem Browser gespeichert.</p>");
-    render();
-  } catch (err) {
-    console.error(err);
-    $("foot").insertAdjacentHTML("beforeend", "<p>Besucher-Meldungen sind gerade nicht erreichbar.</p>");
-  }
 }
 boot();

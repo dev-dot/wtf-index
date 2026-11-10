@@ -24,14 +24,19 @@ Die Preise stammen aus Speisekarten, Angaben des WTF-Teams und geprüften Besuch
 ## Projektaufbau
 
 ```
-index.html                 Seite
+index.html                 Karte
+admin.html                 Admin-Bereich
 css/style.css              Design (hell und dunkel)
+css/admin.css              Ergänzungen für den Admin-Bereich
 js/app.js                  Karte, Ranking, Melde-Formular
-js/store.js                Besucher-Meldungen (Supabase oder Demo-Modus)
+js/admin.js                Meldungen freigeben, Lokale und Preise pflegen
+js/backend.js              Datenzugriff: Supabase oder lokaler Modus
+js/model.js                Indizes, Regeln, Datenformat
 js/config.js               Öffentliche Konfiguration (Supabase, Kartenkacheln)
-data/venues.json           Lokale und Speisekarten-Preise
+data/venues.json           Lokale und Preise (Startdaten / lokaler Modus)
 data/stuttgart-boundary.json  Stadtgrenze (GADM, vereinfacht)
-supabase/schema.sql        Tabelle und Zugriffsregeln für Meldungen
+supabase/schema.sql        Tabellen und Zugriffsregeln
+supabase/seed.sql          Startdaten aus data/venues.json (npm run seed)
 ```
 
 Keine Build-Tools nötig: Die Seite ist rein statisch und läuft auf jedem Static-Hosting (Netlify, Vercel, GitHub Pages).
@@ -42,15 +47,30 @@ Keine Build-Tools nötig: Die Seite ist rein statisch und läuft auf jedem Stati
 python3 -m http.server 8000
 ```
 
-Dann <http://localhost:8000> öffnen. Ohne Supabase-Konfiguration läuft die App im **Demo-Modus**: Meldungen werden nur im eigenen Browser gespeichert.
+Dann <http://localhost:8000> öffnen, den Admin-Bereich unter <http://localhost:8000/admin.html>.
 
-## Besucher-Meldungen mit Supabase
+Ohne Supabase läuft alles im **lokalen Modus**: Startdaten kommen aus `data/venues.json`, Änderungen und Meldungen bleiben im eigenen Browser. Im Admin-Bereich lassen sich die Änderungen als `venues.json` exportieren und ins Repository übernehmen.
+
+## Admin-Bereich
+
+`admin.html` (nicht verlinkt, `noindex`):
+
+- **Meldungen:** offene Besucher-Meldungen mit Vergleich zum aktuellen Preis freigeben oder ablehnen
+- **Lokale:** anlegen und bearbeiten, Standort per Adresssuche (OpenStreetMap Nominatim) oder Klick in die Karte setzen, Lokale ausblenden
+- **Preise:** neuen Preis mit Quelle, Datum der Karte und Hinweis eintragen. Alte Preise bleiben als Verlauf erhalten, der neueste zählt.
+
+## Supabase einrichten
 
 1. Projekt auf [supabase.com](https://supabase.com) anlegen (Region EU).
-2. `supabase/schema.sql` im SQL-Editor ausführen.
-3. In `js/config.js` die Projekt-URL und den **anon**-Schlüssel eintragen.
+2. Im SQL-Editor `supabase/schema.sql` und danach `supabase/seed.sql` ausführen.
+3. Unter *Authentication → Users* einen Nutzer mit E-Mail und Passwort anlegen und ihn zum Admin machen:
+   ```sql
+   insert into public.admins (user_id) select id from auth.users where email = 'du@example.com';
+   ```
+4. In `js/config.js` die Projekt-URL und den **anon**-Schlüssel eintragen.
+5. Unter *Authentication → Providers* die öffentliche Registrierung abschalten, damit sich niemand selbst Konten anlegt.
 
-Neue Meldungen kommen mit Status `pending` an und erscheinen erst, wenn jemand vom Team sie im Table Editor auf `approved` setzt.
+Zugriffsregeln: Alle lesen aktive Lokale, Preise und freigegebene Meldungen. Alle dürfen Meldungen einreichen, die als `pending` ankommen. Schreiben und Freigeben dürfen nur Nutzer aus der Tabelle `admins`.
 
 ## Kartenkacheln
 
@@ -58,7 +78,7 @@ Standardmäßig nutzt die App die Kacheln von openstreetmap.org. Die sind für E
 
 ## Neue Lokale und Preise
 
-Lokale stehen in `data/venues.json`. Pro Lokal:
+Im Betrieb über den Admin-Bereich. Im lokalen Modus stehen die Startdaten in `data/venues.json`. Pro Lokal:
 
 ```json
 {
@@ -80,6 +100,6 @@ Lokale stehen in `data/venues.json`. Pro Lokal:
 
 ## Offen
 
-- Admin-Bereich zum Freigeben von Meldungen und Pflegen von Preisen
-- Preisverlauf pro Lokal
+- Preisverlauf öffentlich anzeigen (Daten sind schon da)
+- Hochladen von Speisekarten-PDFs im Admin-Bereich
 - Impressum und Datenschutzerklärung (vor dem öffentlichen Start Pflicht)
