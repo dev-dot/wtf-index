@@ -1,0 +1,505 @@
+{
+ "collected": "2026-11-10",
+ "venues": [
+  {
+   "id": "r01",
+   "name": "Ragazzi",
+   "type": "Pizzeria",
+   "district": "West",
+   "address": "Breitscheidstr. 22",
+   "location": {
+    "lat": 48.7772,
+    "lon": 9.1668
+   },
+   "source": {
+    "label": "Hauskarte (PDF)",
+    "url": null,
+    "date": "2026-10-01",
+    "stand": "Lokal-Karte 10/2026"
+   },
+   "prices": {
+    "bier3": {
+     "price": 4.7,
+     "tap": "b"
+    },
+    "pizza": {
+     "price": 15.5
+    }
+   },
+   "notes": {
+    "pizza": "San Marzano, Fior di Latte aus Agerola · auf Wolt 16,50 €",
+    "bier3": "Moretti oder Peroni, 0,33 l Flasche",
+    "bier": "Nur Weissbier in 0,5 l (5,00 €, zählt nicht)",
+    "wasser": "Nur 0,5 l im Angebot"
+   }
+  },
+  {
+   "id": "r02",
+   "name": "Italo Disco",
+   "type": "Pizzeria",
+   "district": "West",
+   "address": "Augustenstr. 70",
+   "location": {
+    "lat": 48.7712,
+    "lon": 9.1612
+   },
+   "source": {
+    "label": "Hauskarte (PDF)",
+    "url": null,
+    "date": "2026-10-19",
+    "stand": "19.10.2026"
+   },
+   "prices": {
+    "pizza": {
+     "price": 13.9
+    }
+   },
+   "notes": {
+    "pizza": "San Marzano, Fior di Latte · April 2023 noch 10,90 € (+28 %)",
+    "wasser": "Getränkekarte ohne Wasser und Softdrinks",
+    "bier3": "Getränkekarte ohne Bier",
+    "bier": "Getränkekarte ohne Bier"
+   }
+  },
+  {
+   "id": "r20",
+   "name": "L'Artista Mitte",
+   "type": "Pizzeria",
+   "district": "Mitte",
+   "address": "Eberhardstr. 69–71",
+   "location": {
+    "lat": 48.7729,
+    "lon": 9.1796
+   },
+   "source": {
+    "label": "Angabe WTF-Team",
+    "url": null,
+    "date": "2026-11-10",
+    "stand": "10.11.2026"
+   },
+   "prices": {
+    "pizza": {
+     "price": 13.5
+    }
+   },
+   "notes": {
+    "pizza": "gleicher Preis wie in Plieningen"
+   }
+  },
+  {
+   "id": "r03",
+   "name": "L'Artista Plieningen",
+   "type": "Pizzeria",
+   "district": "Plieningen",
+   "address": "Filderhauptstr. 12",
+   "location": {
+    "lat": 48.7012,
+    "lon": 9.2138
+   },
+   "source": {
+    "label": "Angabe WTF-Team",
+    "url": null,
+    "date": "2026-11-10",
+    "stand": "10.11.2026"
+   },
+   "prices": {
+    "pizza": {
+     "price": 13.5
+    }
+   },
+   "notes": {
+    "pizza": "April 2024 noch 13,00 € (+4 %)"
+   }
+  },
+  {
+   "id": "r04",
+   "name": "Ciao Amore Pizza",
+   "type": "Pizzeria",
+   "district": "Mitte",
+   "address": "Eberhardstr. 10",
+   "location": {
+    "lat": 48.7744,
+    "lon": 9.1762
+   },
+   "source": {
+    "label": "speisekarte.de",
+    "url": "https://www.speisekarte.de/stuttgart/restaurant/ciao_amore_pizza/speisekarte",
+    "date": "2025-11-04",
+    "stand": "04.11.2025"
+   },
+   "prices": {
+    "pizza": {
+     "price": 14
+    }
+   },
+   "notes": {
+    "pizza": "auf Wolt 16,00 €"
+   }
+  },
+  {
+   "id": "r19",
+   "name": "Da Peppone (HTC)",
+   "type": "Pizzeria",
+   "district": "Degerloch",
+   "address": "Bopseräcker 1 (HTC)",
+   "location": {
+    "lat": 48.7488,
+    "lon": 9.1795
+   },
+   "source": {
+    "label": "Hauskarte (PDF)",
+    "url": null,
+    "date": "2026-05-15",
+    "stand": "15.05.2026"
+   },
+   "prices": {
+    "wasser": {
+     "price": 6
+    },
+    "bier3": {
+     "price": 3.5
+    },
+    "bier": {
+     "price": 4
+    },
+    "pizza": {
+     "price": 10
+    }
+   },
+   "notes": {
+    "pizza": "Tomaten, Mozzarella, Basilikum",
+    "wasser": "San Pellegrino / Acqua Panna",
+    "bier3": "Cluss Kellerpils oder Dinkelacker Privat, Fass oder Flasche nicht angegeben",
+    "bier": "Cluss Kellerpils oder Dinkelacker Privat, Fass oder Flasche nicht angegeben"
+   }
+  },
+  {
+   "id": "r06",
+   "name": "Alaturka",
+   "type": "Döner",
+   "district": "Mitte",
+   "address": "Olgastr. 75",
+   "location": {
+    "lat": 48.7712,
+    "lon": 9.1832
+   },
+   "source": {
+    "label": "speisekarte.de",
+    "url": "https://www.speisekarte.de/stuttgart/restaurant/alaturka_das_stuttgarter_original/speisekarte",
+    "date": "2025-05-20",
+    "stand": "20.05.2025"
+   },
+   "prices": {
+    "doener": {
+     "price": 9.5
+    }
+   },
+   "notes": {
+    "doener": "Steak im Brot mit Grillgemüse"
+   }
+  },
+  {
+   "id": "r07",
+   "name": "Kebaphaus am Feuersee",
+   "type": "Döner",
+   "district": "West",
+   "address": "Silberburgstr. 149",
+   "location": {
+    "lat": 48.7728,
+    "lon": 9.1668
+   },
+   "source": {
+    "label": "eigene Website (Screenshot)",
+    "url": null,
+    "date": "2026-11-10",
+    "stand": "10.11.2026"
+   },
+   "prices": {
+    "doener": {
+     "price": 9.9
+    }
+   },
+   "notes": {
+    "doener": "Döner Kebap · auf Lieferando zuvor 6,40 €"
+   }
+  },
+  {
+   "id": "r18",
+   "name": "Schwab Döner",
+   "type": "Döner",
+   "district": "West",
+   "address": "Schwabstr. 57",
+   "location": {
+    "lat": 48.7745,
+    "lon": 9.1552
+   },
+   "source": {
+    "label": null,
+    "url": null,
+    "date": "2026-11-10",
+    "stand": null
+   },
+   "prices": {},
+   "notes": {
+    "doener": "Noch kein Preis erfasst"
+   },
+   "wanted": [
+    "doener"
+   ]
+  },
+  {
+   "id": "r16",
+   "name": "Dilgelay",
+   "type": "Döner",
+   "district": "Ost",
+   "address": "Neckarstr. 156 (Stöckach)",
+   "location": {
+    "lat": 48.7862,
+    "lon": 9.1985
+   },
+   "source": {
+    "label": "Tischkarte (PDF)",
+    "url": null,
+    "date": "2026-04-20",
+    "stand": "04/2026"
+   },
+   "prices": {
+    "doener": {
+     "price": 8.5
+    }
+   },
+   "notes": {
+    "doener": "Döner Kebap im Fladenbrot, Hack- oder Hähnchenfleisch · Scheibenfleisch 9,50 €",
+    "wasser": "Nur 0,5 l: Mineralwasser 2,00 €",
+    "bier3": "Kein Bier auf der Karte",
+    "bier": "Kein Bier auf der Karte"
+   }
+  },
+  {
+   "id": "r17",
+   "name": "Regenbogen Imbiss",
+   "type": "Döner",
+   "district": "Möhringen",
+   "address": "Möhringen (Adresse folgt)",
+   "location": {
+    "lat": 48.7232,
+    "lon": 9.1452
+   },
+   "source": {
+    "label": "Wolt",
+    "url": "https://wolt.com/de/deu/stuttgart/restaurant/regenbogen-imbiss",
+    "date": "2026-11-10",
+    "stand": null
+   },
+   "prices": {},
+   "notes": {
+    "doener": "Noch kein Preis erfasst · Standort ungefähr"
+   },
+   "wanted": [
+    "doener"
+   ]
+  },
+  {
+   "id": "r21",
+   "name": "Sutsche",
+   "type": "Kneipe",
+   "district": "West",
+   "address": "Breitscheidstr. 38",
+   "location": {
+    "lat": 48.7768,
+    "lon": 9.1648
+   },
+   "source": {
+    "label": "Hauskarte (PDF)",
+    "url": null,
+    "date": "2026-11-10",
+    "stand": "10.11.2026"
+   },
+   "prices": {
+    "wasser": {
+     "price": 5.5
+    },
+    "bier3": {
+     "price": 3.5
+    },
+    "bier": {
+     "price": 5
+    },
+    "spaetzle": {
+     "price": 14
+    }
+   },
+   "notes": {
+    "spaetzle": "hausgemacht, mit Salat",
+    "wasser": "Stilles Wasser oder Tafelwasser",
+    "bier3": "Export, Fass oder Flasche nicht angegeben · CD Pils 4,00 €",
+    "bier": "Export, Fass oder Flasche nicht angegeben · CD Pils 5,50 €"
+   }
+  },
+  {
+   "id": "r11",
+   "name": "Gasthaus zur Linde",
+   "type": "Schwäbisch",
+   "district": "Möhringen",
+   "address": "Sigmaringer Str. 49",
+   "location": {
+    "lat": 48.7248,
+    "lon": 9.1498
+   },
+   "source": {
+    "label": "Hauskarte (PDF)",
+    "url": null,
+    "date": "2026-11-10",
+    "stand": "2026, Getränke 04/2025"
+   },
+   "prices": {
+    "wasser": {
+     "price": 8.5
+    },
+    "bier3": {
+     "price": 4.7,
+     "tap": "f"
+    },
+    "spaetzle": {
+     "price": 19.9
+    }
+   },
+   "notes": {
+    "spaetzle": "mit Röstzwiebeln & Feldsalat · Dez. 2023 noch 17,90 € (+11 %)",
+    "wasser": "Ensinger Bio Naturell / Medium",
+    "bier3": "Dinkelacker CD Pils vom Fass",
+    "bier": "Kein Pils oder Helles in 0,5 l (Hefeweizen 5,90 € zählt nicht)"
+   }
+  },
+  {
+   "id": "r12",
+   "name": "Weinstube Fröhlich",
+   "type": "Schwäbisch",
+   "district": "Mitte",
+   "address": "Leonhardstr. 5",
+   "location": {
+    "lat": 48.7741,
+    "lon": 9.1812
+   },
+   "source": {
+    "label": "Hauskarte (PDF)",
+    "url": null,
+    "date": "2026-11-10",
+    "stand": "aktuell"
+   },
+   "prices": {
+    "wasser": {
+     "price": 7.2
+    },
+    "bier3": {
+     "price": 5.1,
+     "tap": "f"
+    },
+    "spaetzle": {
+     "price": 22.8
+    }
+   },
+   "notes": {
+    "bier3": "Helles Export vom Fass · Pils 5,20 €",
+    "spaetzle": "mit kleinem Salat · Dez. 2024 noch 20,10 € (+13 %)",
+    "wasser": "Teinacher Medium / Still",
+    "bier": "Kein 0,5 l im Angebot, nur 0,3 l vom Fass (siehe Bier 0,3)"
+   }
+  },
+  {
+   "id": "r13",
+   "name": "Weinstube Zur Kiste",
+   "type": "Schwäbisch",
+   "district": "Mitte",
+   "address": "Kanalstr. 2",
+   "location": {
+    "lat": 48.7747,
+    "lon": 9.1826
+   },
+   "source": {
+    "label": "zur-kiste.de",
+    "url": "https://www.zur-kiste.de/speisen-getraenke/",
+    "date": "2026-11-10",
+    "stand": "10.11.2026 geprüft"
+   },
+   "prices": {
+    "spaetzle": {
+     "price": 16.9
+    }
+   },
+   "notes": {
+    "spaetzle": "mit gemischtem Salatteller",
+    "wasser": "Website zeigt nur Speisen und Wein, keine Wasserpreise",
+    "bier3": "Website zeigt nur Speisen und Wein, keine Bierpreise",
+    "bier": "Website zeigt nur Speisen und Wein, keine Bierpreise"
+   }
+  },
+  {
+   "id": "r14",
+   "name": "Weinstube Moegle",
+   "type": "Schwäbisch",
+   "district": "Feuerbach",
+   "address": "Dieterlestr. 32",
+   "location": {
+    "lat": 48.8127,
+    "lon": 9.1598
+   },
+   "source": {
+    "label": "Hauskarte (PDF)",
+    "url": null,
+    "date": "2025-09-01",
+    "stand": "09/2025"
+   },
+   "prices": {
+    "spaetzle": {
+     "price": 14
+    }
+   },
+   "notes": {
+    "spaetzle": "mit Butterzwiebeln & gemischtem Salat · seit Dez. 2024 unverändert",
+    "wasser": "Speisekarte ohne Kaltgetränke",
+    "bier3": "Speisekarte ohne Kaltgetränke",
+    "bier": "Speisekarte ohne Kaltgetränke"
+   }
+  },
+  {
+   "id": "r15",
+   "name": "Weinstube Burg",
+   "type": "Schwäbisch",
+   "district": "Kaltental",
+   "address": "Burgstr. 29",
+   "location": {
+    "lat": 48.7468,
+    "lon": 9.1312
+   },
+   "source": {
+    "label": "Hauskarte (PDF)",
+    "url": null,
+    "date": "2026-10-06",
+    "stand": "Herbst/Winter 2026/27"
+   },
+   "prices": {
+    "wasser": {
+     "price": 5.8
+    },
+    "bier3": {
+     "price": 3.8,
+     "tap": "f"
+    },
+    "bier": {
+     "price": 4.8,
+     "tap": "f"
+    },
+    "spaetzle": {
+     "price": 19.5
+    }
+   },
+   "notes": {
+    "spaetzle": "Burg-Kässpatzen mit Weisswein & Lauchzwiebel, Blattsalat · Dez. 2024 noch 18,50 € (+5 %)",
+    "wasser": "Teinacher Mineralwasser",
+    "bier3": "„Bier-chen vom Fass“",
+    "bier": "„Halbe vom Fass“"
+   }
+  }
+ ]
+}

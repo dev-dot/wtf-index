@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>WTF-Index</title>
+<meta name="description" content="Was kostet Ausgehen in Stuttgart wirklich? Preise für Wasser, Bier, Döner, Pizza Margherita und Käsespätzle auf einer Karte.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <span class="logo">WTF-Index</span>
+    <div class="brand-text"><b>Stuttgart</b><span>Was kostet Ausgehen wirklich?</span></div>
+    <span class="demo-tag" id="countTag">Beta</span>
+  </div>
+  <nav class="switch" id="switch" aria-label="Index wählen"></nav>
+</header>
+
+<main class="app">
+  <section class="mapwrap" aria-label="Karte">
+    <div id="map"></div>
+    <div class="legend" aria-label="Legende">
+      <span><i style="background:var(--fair)"></i>Fair</span>
+      <span><i style="background:var(--meh)"></i>Geht so</span>
+      <span><i style="background:var(--wtf)"></i>WTF?!</span>
+      <span class="legend-note">im Vergleich zum Stuttgart-Median</span>
+    </div>
+    <button class="report-fab" id="fab" type="button">+ Preis melden</button>
+  </section>
+  <aside class="panel">
+    <div class="summary" id="summary"></div>
+    <ol class="list" id="list"></ol>
+    <div class="foot" id="foot"><p>Preise aus Speisekarten, Angaben des WTF-Teams und geprüften Besucher-Meldungen. Neueste Angabe gewinnt. Alle Angaben ohne Gewähr.</p></div>
+  </aside>
+</main>
+
+<div class="sheet-bg" id="sheetBg" hidden>
+  <form class="sheet" id="sheet" novalidate>
+    <h2>Preis melden</h2>
+    <p class="lead">Du warst gerade da? Trag ein, was auf der Karte oder der Rechnung stand. Das Team prüft jede Meldung, bevor sie erscheint.</p>
+    <div class="field"><label for="fVenue">Lokal</label><select id="fVenue" required></select></div>
+    <div class="field"><label for="fItem">Index</label><select id="fItem"></select><span class="hint" id="fItemHint"></span></div>
+    <div class="field" id="tapField"><fieldset><legend>Bier</legend>
+      <label><input type="radio" name="tap" id="fTapF" value="f" checked> vom Fass</label>
+      <label><input type="radio" name="tap" id="fTapB" value="b"> Flasche</label></fieldset></div>
+    <div class="field"><label for="fPrice">Preis</label><div class="eur"><input type="number" id="fPrice" inputmode="decimal" min="0.5" max="60" step="0.1" placeholder="z. B. 5,40" required></div></div>
+    <div class="field"><label for="fNote">Notiz (optional)</label><input type="text" id="fNote" maxlength="120" placeholder="z. B. Happy Hour nicht mitgezählt"></div>
+    <div class="msg" id="fMsg" hidden></div>
+    <div class="actions"><button type="button" class="btn" id="fCancel">Abbrechen</button><button type="submit" class="btn primary" id="fSubmit">Preis melden</button></div>
+  </form>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
