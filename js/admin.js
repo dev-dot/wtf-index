@@ -32,13 +32,14 @@ async function boot() {
 
 async function route() {
   const user = await backend.getUser();
-  ["loginView", "noAdminView", "reportsView", "menusView", "venuesView"].forEach(id => ($(id).hidden = true));
+  ["loginView", "noAdminView", "reportsView", "menusView", "noticesView", "venuesView"].forEach(id => ($(id).hidden = true));
   $("tabs").hidden = true;
   $("logout").hidden = !user || backend.mode === "local";
   $("who").textContent = backend.mode === "local" ? "Lokaler Modus" : user ? user.email : "Nicht angemeldet";
   if (!user) { $("loginView").hidden = false; $("lEmail").focus(); return; }
   if (!(await backend.isAdmin())) { $("noAdminView").hidden = false; return; }
   $("tabs").hidden = false;
+  await purgeMenuFiles();
   await reload();
   showTab(tab);
 }
@@ -68,6 +69,25 @@ async function reload() {
     const menus = await backend.listMenuUploads("pending");
     $("menuCount").textContent = menus.length ? menus.length + " offen" : "keine offen";
   } catch { $("menuCount").textContent = "nicht eingerichtet"; }
+  try {
+    const open = await backend.listNotices("open");
+    $("noticeCount").textContent = open.length ? open.length + " offen" : "keine offen";
+  } catch { $("noticeCount").textContent = "nicht eingerichtet"; }
+}
+
+// Löschfrist: Dateien eingereichter Speisekarten nach Erledigen/Ablehnen löschen, spätestens nach 30 Tagen.
+const MENU_FILE_DAYS = 30;
+async function purgeMenuFiles() {
+  const cutoff = Date.now() - MENU_FILE_DAYS * 24 * 3600 * 1000;
+  let n = 0;
+  for (const status of ["pending", "done", "rejected"]) {
+    let list; try { list = await backend.listMenuUploads(status); } catch { return; }
+    for (const m of list) {
+      if (m.filesDeletedAt || !m.files.length) continue;
+      if (status !== "pending" || m.createdAt < cutoff) { try { await backend.deleteMenuFiles(m); n++; } catch (e) { console.warn("Löschen fehlgeschlagen", m.id, e); } }
+    }
+  }
+  if (n) toast(n === 1 ? "Dateien einer Speisekarte nach Löschfrist entfernt." : "Dateien von " + n + " Speisekarten nach Löschfrist entfernt.");
 }
 
 function showTab(t) {
@@ -76,8 +96,10 @@ function showTab(t) {
   $("reportsView").hidden = t !== "reports";
   $("venuesView").hidden = t !== "venues";
   $("menusView").hidden = t !== "menus";
+  $("noticesView").hidden = t !== "notices";
   if (t === "reports") renderReports();
   else if (t === "menus") renderMenus();
+  else if (t === "notices") renderNotices();
   else { renderVenueList(); if (pickMap) setTimeout(() => pickMap.invalidateSize(), 0); }
 }
 $("tabs").addEventListener("click", e => { const c = e.target.closest(".chip"); if (c) showTab(c.dataset.tab); });
@@ -153,7 +175,8 @@ async function renderMenus() {
     return '<article class="card menu-card" data-id="' + m.id + '"><div><h3>' + title + '</h3><div class="meta">' +
       esc([fmtTs(m.createdAt), !known && m.venueAddress, m.stand && "Stand: " + m.stand].filter(Boolean).join(" · ")) + "</div></div>" +
       (m.note ? "<div>" + esc(m.note) + "</div>" : "") +
-      '<div class="menu-files">' + m.files.map((p, i) => '<a href="#" data-file="' + esc(p) + '" target="_blank" rel="noopener" title="' + esc(m.fileNames[i] || "") + '">' +
+      (m.filesDeletedAt ? '<div class="muted">Dateien gelöscht am ' + fmtTs(m.filesDeletedAt) + " (Löschfrist).</div>" : "") +
+      '<div class="menu-files">' + (m.filesDeletedAt ? [] : m.files).map((p, i) => '<a href="#" data-file="' + esc(p) + '" target="_blank" rel="noopener" title="' + esc(m.fileNames[i] || "") + '">' +
         (/\.pdf$/i.test(m.fileNames[i] || p) ? "PDF<br>" + (i + 1) : "Seite " + (i + 1)) + "</a>").join("") + "</div>" +
       '<div class="acts">' + open + acts + "</div></article>";
   }).join("");
@@ -181,7 +204,12 @@ $("menuCards").addEventListener("click", async e => {
     st.disabled = true;
     try {
       await backend.setMenuUploadStatus(st.dataset.id, st.dataset.mstatus);
-      toast(st.dataset.mstatus === "done" ? "Als erledigt markiert." : st.dataset.mstatus === "rejected" ? "Abgelehnt." : "Zurück in „Offen“.");
+      let gone = false;
+      if (st.dataset.mstatus !== "pending") {
+        const m = (await backend.listMenuUploads(st.dataset.mstatus)).find(x => x.id === st.dataset.id);
+        if (m && !m.filesDeletedAt) { await backend.deleteMenuFiles(m); gone = true; }
+      }
+      toast((st.dataset.mstatus === "done" ? "Als erledigt markiert." : st.dataset.mstatus === "rejected" ? "Abgelehnt." : "Zurück in „Offen“.") + (gone ? " Dateien gelöscht." : ""));
       await reload(); renderMenus();
     } catch (err) { st.disabled = false; toast("Hat nicht geklappt: " + errText(err)); }
     return;
@@ -193,9 +221,51 @@ $("menuCards").addEventListener("click", async e => {
     const m = (await backend.listMenuUploads(menuStatus)).find(x => x.id === cr.dataset.create);
     showTab("venues");
     isNew = true;
-    editing = { id: "", name: m ? m.venueName || "" : "", type: "Restaurant", district: "", address: m ? m.venueAddress || "" : "", location: null, notes: {}, wanted: [], active: true };
+    editing = { id: "", name: m ? m.venueName || "" : "", type: "Restaurant", district: "", address: m ? m.venueAddress || "" : "", location: null, notes: {}, wanted: [], active: false };
     fillVenueForm(); renderVenueList(); $("vName").focus();
   }
+});
+
+/* ---------- Hinweise ---------- */
+let noticeStatus = "open";
+const KIND = { korrektur: "Preis/Angabe falsch", inhaber: "Vom Lokal", rechtsverletzung: "Rechtswidriger Inhalt", sonstiges: "Sonstiges" };
+async function renderNotices() {
+  const box = $("noticeCards");
+  box.innerHTML = '<p class="muted">Lädt …</p>';
+  let list;
+  try { list = await backend.listNotices(noticeStatus); }
+  catch (e) {
+    box.innerHTML = '<p class="card">Hinweise lassen sich noch nicht laden (' + esc(errText(e)) + "). Ist die Migration <code>supabase/migrations/2026-11-11_hinweise_loeschfrist.sql</code> ausgeführt?</p>";
+    return;
+  }
+  $("noticesEmpty").hidden = list.length > 0;
+  box.innerHTML = list.map(n => {
+    const v = n.venueId && venues.find(x => x.id === n.venueId);
+    return '<article class="card menu-card"><div><h3>' + esc(KIND[n.kind] || n.kind) + (n.kind === "rechtsverletzung" ? '<span class="new-tag">DSA</span>' : "") + '</h3><div class="meta">' +
+      esc([fmtTs(n.createdAt), v ? v.name : "kein Lokal"].join(" · ")) + "</div></div>" +
+      '<div class="notice-msg">' + esc(n.message) + "</div>" +
+      (n.name || n.email ? '<div class="meta">' + esc(n.name || "") + (n.email ? ' · <span class="sel">' + esc(n.email) + "</span>" : "") + "</div>" : "") +
+      '<div class="acts">' + (v ? '<button type="button" class="btn small" data-open="' + esc(v.id) + '">Lokal öffnen</button>' : "") +
+      (noticeStatus === "open" ? '<button type="button" class="btn small ok" data-nstatus="done" data-id="' + n.id + '">Erledigt</button>'
+        : '<button type="button" class="btn small" data-nstatus="open" data-id="' + n.id + '">Zurück zu offen</button>') + "</div></article>";
+  }).join("");
+}
+$("noticeSeg").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  noticeStatus = b.dataset.status;
+  document.querySelectorAll("#noticeSeg button").forEach(x => x.setAttribute("aria-pressed", x === b));
+  renderNotices();
+});
+$("noticeCards").addEventListener("click", async e => {
+  const st = e.target.closest("[data-nstatus]");
+  if (st) {
+    st.disabled = true;
+    try { await backend.setNoticeStatus(st.dataset.id, st.dataset.nstatus); toast(st.dataset.nstatus === "done" ? "Erledigt." : "Zurück in „Offen“."); await reload(); renderNotices(); }
+    catch (err) { st.disabled = false; toast("Hat nicht geklappt: " + errText(err)); }
+    return;
+  }
+  const op = e.target.closest("[data-open]");
+  if (op) { showTab("venues"); openVenue(op.dataset.open); }
 });
 
 /* ---------- Lokale: Liste ---------- */
@@ -204,7 +274,7 @@ function renderVenueList() {
   $("venueList").innerHTML = venues
     .filter(v => !q || (v.name + " " + v.district + " " + v.type).toLowerCase().includes(q))
     .map(v => '<li data-id="' + esc(v.id) + '" class="' + (editing && editing.id === v.id ? "active " : "") + (v.active === false ? "inactive" : "") +
-      '" tabindex="0"><b>' + esc(v.name) + "</b><small>" + esc(v.type) + " · " + esc(v.district || "–") + (v.location ? "" : " · ohne Standort") + "</small></li>")
+      '" tabindex="0"><b>' + esc(v.name) + "</b><small>" + esc(v.type) + " · " + esc(v.district || "–") + (v.location ? "" : " · ohne Standort") + (v.active === false ? " · noch nicht freigeschaltet" : "") + "</small></li>")
     .join("");
 }
 $("vSearch").addEventListener("input", renderVenueList);
@@ -212,7 +282,7 @@ $("venueList").addEventListener("click", e => { const li = e.target.closest("li"
 $("venueList").addEventListener("keydown", e => { if (e.key === "Enter" && e.target.dataset.id) openVenue(e.target.dataset.id); });
 $("newVenue").addEventListener("click", () => {
   isNew = true;
-  editing = { id: "", name: "", type: "Pizzeria", district: "", address: "", location: null, notes: {}, wanted: [], active: true };
+  editing = { id: "", name: "", type: "Pizzeria", district: "", address: "", location: null, notes: {}, wanted: [], active: false };
   fillVenueForm(); renderVenueList(); $("vName").focus();
 });
 
@@ -253,7 +323,7 @@ function fillVenueForm() {
   $("vTitle").textContent = isNew ? "Neues Lokal" : v.name;
   $("vId").textContent = isNew ? "" : "ID " + v.id;
   $("vName").value = v.name; $("vType").value = v.type; $("vDistrict").value = v.district; $("vAddress").value = v.address;
-  $("vActive").checked = v.active !== false;
+  $("vActive").checked = v.active === true || (v.active !== false && !isNew);
   document.querySelectorAll("#vWanted input").forEach(c => (c.checked = (v.wanted || []).includes(c.value)));
   msg($("vMsg"), "");
   ensurePickMap();
@@ -306,7 +376,7 @@ $("venueForm").addEventListener("submit", async e => {
     const wasNew = isNew; isNew = false;
     await reload();
     openVenue(v.id);
-    toast(wasNew ? "Lokal angelegt. Jetzt Preise eintragen." : "Gespeichert.");
+    toast(wasNew ? (v.active ? "Lokal angelegt. Jetzt Preise eintragen." : "Lokal angelegt, aber noch ausgeblendet. Erst probieren, dann freischalten.") : "Gespeichert.");
   } catch (err) { msg($("vMsg"), "Speichern fehlgeschlagen: " + errText(err), true); }
   finally { $("vSave").disabled = false; }
 });

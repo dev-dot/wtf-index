@@ -74,7 +74,8 @@ function popupHtml(v) {
     '<div class="reports">' + (v.prices[current] && v.prices[current].sourceUrl ? '<a href="' + esc(v.prices[current].sourceUrl) + '" target="_blank" rel="noopener">Quelle: ' + esc(v.prices[current].sourceLabel || "Link") + " ↗</a><br>" : "") +
     (osm ? '<a href="' + osm + '" target="_blank" rel="noopener">In OpenStreetMap ansehen ↗</a>' : "") + "</div>" +
     '<button type="button" data-report="' + v.id + '">Preis für ' + ITEMS[current].label + " melden</button>" +
-    '<button type="button" class="menu-link" data-menu="' + v.id + '">Ganze Speisekarte schicken</button></div>';
+    '<button type="button" class="menu-link" data-menu="' + v.id + '">Ganze Speisekarte schicken</button>' +
+    '<button type="button" class="menu-link" data-hint="' + v.id + '">Preis falsch? Hinweis senden</button></div>';
 }
 function addPin(v, html, title, z) {
   if (!v.location) return;
@@ -179,7 +180,8 @@ function fillVenueSelect() {
   const keep = fVenue.value;
   fVenue.innerHTML = [...VENUES].sort((a, b) => a.name.localeCompare(b.name, "de"))
     .map(v => '<option value="' + v.id + '">' + esc(v.name) + " (" + esc(v.district) + ")</option>").join("") +
-    (mode === "menu" ? '<option value="' + NEW_VENUE + '">Lokal fehlt in der Liste …</option>' : "");
+    (mode === "menu" ? '<option value="' + NEW_VENUE + '">Neues Lokal vorschlagen …</option>' : "");
+  if (mode === "hint") fVenue.insertAdjacentHTML("afterbegin", '<option value="">Kein bestimmtes Lokal</option>');
   if ([...fVenue.options].some(o => o.value === keep)) fVenue.value = keep;
   syncVenue();
 }
@@ -191,11 +193,15 @@ function setMode(m) {
   document.querySelectorAll("#modeSeg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.mode === m));
   $("modePrice").hidden = m !== "price";
   $("modeMenu").hidden = m !== "menu";
-  $("sheetTitle").textContent = m === "price" ? "Preis melden" : "Speisekarte schicken";
-  $("sheetLead").textContent = m === "price"
-    ? "Du warst gerade da? Trag ein, was auf der Karte oder der Rechnung stand. Das Team prüft jede Meldung, bevor sie erscheint."
-    : "Lade die Speisekarte als PDF oder Fotos hoch. Das Team liest die Preise aus und trägt sie ein. Die Dateien sieht nur das Team.";
-  fSubmit.textContent = m === "price" ? "Preis melden" : "Speisekarte schicken";
+  $("modeHint").hidden = m !== "hint";
+  $("sheetTitle").textContent = { price: "Preis melden", menu: "Speisekarte schicken", hint: "Hinweis an das Team" }[m];
+  $("sheetLead").textContent = {
+    price: "Du warst gerade da? Trag ein, was auf der Karte oder der Rechnung stand. Das Team prüft jede Meldung, bevor sie erscheint.",
+    menu: "Lade die Speisekarte als PDF oder Fotos hoch. Das Team liest die Preise aus und trägt sie ein. Die Dateien sieht nur das Team und löscht sie nach dem Eintragen.",
+    hint: "Ein Preis stimmt nicht, du gehörst zum Lokal oder willst einen Inhalt melden? Schreib uns. Wir kümmern uns zügig darum.",
+  }[m];
+  fSubmit.textContent = { price: "Preis melden", menu: "Speisekarte schicken", hint: "Hinweis senden" }[m];
+  syncHintKind();
   fillVenueSelect(); showMsg("");
 }
 $("modeSeg").addEventListener("click", e => { const b = e.target.closest("button"); if (b) setMode(b.dataset.mode); });
@@ -212,6 +218,14 @@ function checkFiles() {
 }
 $("mFiles").addEventListener("change", () => showMsg(checkFiles(), true));
 
+function syncHintKind() {
+  const legal = $("hKind").value === "rechtsverletzung";
+  $("hFaithRow").hidden = !legal;
+  $("hNameOpt").textContent = legal ? "(Pflicht)" : "(optional)";
+  $("hEmailOpt").textContent = legal ? "(Pflicht)" : "(optional, für eine Antwort)";
+}
+$("hKind").addEventListener("change", syncHintKind);
+
 function openSheet(vid, it, m = "price") {
   setMode(m);
   if (vid) fVenue.value = vid;
@@ -222,12 +236,17 @@ function openSheet(vid, it, m = "price") {
   fPrice.value = ""; fPrice.placeholder = e ? "aktuell " + fmtShort(e.price) : "z. B. 5,40"; fNote.value = "";
   $("mFiles").value = ""; $("mFileList").innerHTML = ""; $("mStand").value = ""; $("mNote").value = ""; $("mConsent").checked = false;
   $("mVenueName").value = ""; $("mVenueAddress").value = "";
+  if (m === "hint") { $("hKind").value = "korrektur"; $("hMessage").value = ""; $("hFaith").checked = false; syncHintKind(); if (!vid) fVenue.value = ""; }
   fSubmit.disabled = !backend; showMsg(backend ? "" : "Meldungen sind gerade nicht verfügbar.", !backend);
-  $("sheetBg").hidden = false; setTimeout(() => (m === "price" ? fPrice : $("mFiles")).focus(), 30);
+  $("sheetBg").hidden = false; setTimeout(() => ({ price: fPrice, menu: $("mFiles"), hint: $("hMessage") }[m]).focus(), 30);
 }
 function closeSheet() { $("sheetBg").hidden = true; }
 $("fab").addEventListener("click", () => openSheet(selected, current));
-$("map").addEventListener("click", e => { const b = e.target.closest("[data-menu]"); if (b) openSheet(b.dataset.menu, current, "menu"); });
+$("map").addEventListener("click", e => {
+  const b = e.target.closest("[data-menu]"); if (b) openSheet(b.dataset.menu, current, "menu");
+  const h = e.target.closest("[data-hint]"); if (h) openSheet(h.dataset.hint, current, "hint");
+});
+$("hintLink").addEventListener("click", () => openSheet(null, current, "hint"));
 $("fCancel").addEventListener("click", closeSheet);
 $("sheetBg").addEventListener("click", e => { if (e.target === $("sheetBg")) closeSheet(); });
 document.addEventListener("keydown", e => { if (e.key === "Escape" && !$("sheetBg").hidden) closeSheet(); });
@@ -266,9 +285,24 @@ async function submitMenu() {
   toast("Danke! Das Team trägt die Preise aus deiner Speisekarte ein.");
 }
 
+async function submitHint() {
+  const kind = $("hKind").value, message = $("hMessage").value.trim();
+  const name = $("hName").value.trim(), email = $("hEmail").value.trim();
+  if (message.length < 10) { showMsg("Bitte beschreibe kurz, worum es geht (mindestens 10 Zeichen).", true); $("hMessage").focus(); return; }
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showMsg("Die E-Mail-Adresse sieht nicht richtig aus.", true); $("hEmail").focus(); return; }
+  if (kind === "rechtsverletzung") {
+    if (!name || !email) { showMsg("Für die Meldung eines rechtswidrigen Inhalts brauchen wir Name und E-Mail.", true); return; }
+    if (!$("hFaith").checked) { showMsg("Bitte bestätige, dass du in gutem Glauben meldest.", true); return; }
+  }
+  fSubmit.disabled = true; showMsg("Wird gesendet …");
+  await backend.addNotice({ kind, venueId: fVenue.value || null, message, name: name || null, email: email || null, goodFaith: $("hFaith").checked });
+  closeSheet();
+  toast(email ? "Danke! Wir melden uns per E-Mail." : "Danke für deinen Hinweis!");
+}
+
 $("sheet").addEventListener("submit", async e => {
   e.preventDefault();
-  try { await (mode === "price" ? submitPrice() : submitMenu()); }
+  try { await ({ price: submitPrice, menu: submitMenu, hint: submitHint }[mode])(); }
   catch (err) {
     console.error(err);
     fSubmit.disabled = false;
@@ -302,7 +336,8 @@ async function boot() {
     map.fitBounds(city.getBounds(), { padding: [16, 16] });
   }
   fillVenueSelect();
-  $("countTag").textContent = "Beta · " + VENUES.length + " Lokale";
+  $("countTag").textContent = "Kuratiert · " + VENUES.length + " Lokale";
   render();
+  if (location.hash === "#hinweis") openSheet(null, current, "hint");
 }
 boot();

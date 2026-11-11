@@ -72,7 +72,7 @@ code { font-family: var(--f-mono); font-size: .92em; background: var(--bg); padd
 #venueList li.active { border-left-color: var(--ink); }
 #venueList li b { font-weight: 600; }
 #venueList li small { color: var(--muted); font-size: 12px; }
-#venueList li.inactive b { text-decoration: line-through; color: var(--muted); }
+#venueList li.inactive b { color: var(--muted); }
 .venue-editor { display: grid; gap: 18px; min-width: 0; }
 .pick-map { height: 260px; border-radius: 8px; border: 1.5px solid var(--line); background: var(--map-bg); }
 
@@ -109,3 +109,5 @@ code { font-family: var(--f-mono); font-size: .92em; background: var(--bg); padd
 .menu-files a { display: grid; place-items: center; width: 88px; height: 88px; border: 1.5px solid var(--line); border-radius: 6px; background: var(--bg); overflow: hidden; color: var(--ink); text-decoration: none; font-size: 12px; font-weight: 600; text-align: center; }
 .menu-files a img { width: 100%; height: 100%; object-fit: cover; }
 .menu-card .acts { display: flex; flex-wrap: wrap; gap: 6px; }
+.notice-msg { white-space: pre-wrap; font-size: 14px; }
+.sel { user-select: all; font-family: var(--f-mono); font-size: 12px; }

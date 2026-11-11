@@ -11,7 +11,13 @@ export async function createBackend() {
 
 /* ---------------- Supabase ---------------- */
 async function supabaseBackend() {
-  const { createClient } = await import("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/+esm");
+  // Selbst gehostet (vendor/supabase.js, UMD-Build), damit keine Daten an ein CDN gehen.
+  if (!window.supabase) await new Promise((res, rej) => {
+    const s = document.createElement("script");
+    s.src = "vendor/supabase.js"; s.onload = res; s.onerror = () => rej(new Error("vendor/supabase.js nicht geladen"));
+    document.head.appendChild(s);
+  });
+  const { createClient } = window.supabase;
   const sb = createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonKey);
   const must = ({ data, error }) => { if (error) throw error; return data; };
 
@@ -96,12 +102,37 @@ async function supabaseBackend() {
       must(await sb.from("menu_uploads").update({ status, reviewed_at: new Date().toISOString(), reviewed_by: user ? user.id : null }).eq("id", id));
     },
     async fileUrl(path) { return must(await sb.storage.from("menus").createSignedUrl(path, 600)).signedUrl; },
+    async deleteMenuFiles(m) {
+      if (m.files.length) {
+        const { error } = await sb.storage.from("menus").remove(m.files);
+        if (error) throw error;
+      }
+      must(await sb.from("menu_uploads").update({ files_deleted_at: new Date().toISOString() }).eq("id", m.id));
+    },
+
+    // --- Hinweise ---
+    async addNotice(n) {
+      must(await sb.from("notices").insert({
+        kind: n.kind, venue_id: n.venueId, message: n.message, name: n.name, email: n.email, good_faith: !!n.goodFaith,
+      }));
+    },
+    async listNotices(status) {
+      return must(await sb.from("notices").select("*").eq("status", status).order("created_at", { ascending: false }).limit(200)).map(r => ({
+        id: r.id, kind: r.kind, venueId: r.venue_id, message: r.message, name: r.name, email: r.email, goodFaith: r.good_faith,
+        status: r.status, createdAt: Date.parse(r.created_at),
+      }));
+    },
+    async setNoticeStatus(id, status) {
+      const user = await this.getUser();
+      must(await sb.from("notices").update({ status, reviewed_at: new Date().toISOString(), reviewed_by: user ? user.id : null }).eq("id", id));
+    },
   };
 }
 
 const menuFrom = r => ({
   id: r.id, venueId: r.venue_id, venueName: r.venue_name, venueAddress: r.venue_address, stand: r.stand, note: r.note,
   files: r.files || [], fileNames: r.file_names || [], status: r.status, createdAt: Date.parse(r.created_at),
+  filesDeletedAt: r.files_deleted_at ? Date.parse(r.files_deleted_at) : null,
 });
 function fileExt(f) {
   const m = /\.([a-z0-9]{2,5})$/i.exec(f.name);
@@ -120,7 +151,7 @@ async function localBackend() {
   const base = fromJson(json);
   // Überlagerung: geänderte/neue Lokale, zusätzliche Preise, gelöschte Preis-IDs, Meldungen
   let db = readLocal() || { venues: {}, prices: [], deleted: [], reports: [] };
-  db.menus = db.menus || []; db.files = db.files || {};
+  db.menus = db.menus || []; db.files = db.files || {}; db.notices = db.notices || [];
   const save = () => writeLocal(db);
   const all = () => {
     const venues = base.venues.filter(v => !db.venues[v.id]).concat(Object.values(db.venues));
@@ -179,9 +210,17 @@ async function localBackend() {
     async listMenuUploads(status) { return db.menus.filter(m => m.status === status); },
     async setMenuUploadStatus(id, status) { const m = db.menus.find(x => x.id === id); if (m) { m.status = status; save(); } },
     async fileUrl(path) { return db.files[path] || null; },
+    async deleteMenuFiles(m) {
+      for (const p of m.files) delete db.files[p];
+      const x = db.menus.find(y => y.id === m.id); if (x) x.filesDeletedAt = Date.now();
+      save();
+    },
+    async addNotice(n) { db.notices.unshift({ ...n, id: uid(), status: "open", createdAt: Date.now() }); save(); },
+    async listNotices(status) { return db.notices.filter(n => n.status === status); },
+    async setNoticeStatus(id, status) { const n = db.notices.find(x => x.id === id); if (n) { n.status = status; save(); } },
     // Nur lokal: Stand als venues.json exportieren bzw. Änderungen verwerfen
     exportJson() { const { venues, prices } = all(); return toJson(venues, prices); },
     hasChanges() { return Object.keys(db.venues).length + db.prices.length + db.deleted.length > 0; },
-    resetChanges() { db = { venues: {}, prices: [], deleted: [], reports: db.reports, menus: db.menus, files: db.files }; save(); },
+    resetChanges() { db = { venues: {}, prices: [], deleted: [], reports: db.reports, menus: db.menus, files: db.files, notices: db.notices }; save(); },
   };
 }

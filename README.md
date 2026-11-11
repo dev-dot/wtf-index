@@ -4,6 +4,10 @@
 
 Die Preise stammen aus Speisekarten, Angaben des WTF-Teams und geprüften Besucher-Meldungen. Neueste Angabe gewinnt. Alle Angaben ohne Gewähr.
 
+## Auswahl der Lokale
+
+Der WTF-Index ist **kuratiert**: Aufgenommen werden nur Restaurants und Imbisse, in denen das Essen gut schmeckt. Neue Lokale (auch Vorschläge von Besuchern) bleiben im Admin-Bereich ausgeblendet, bis jemand vom Team dort gegessen und sie freigeschaltet hat. Der Index zeigt also, was *gutes* Essen in Stuttgart kostet, und ist kein vollständiger Marktüberblick.
+
 ## Indizes und Regeln
 
 | Index | Was zählt |
@@ -73,9 +77,20 @@ Ohne Supabase läuft alles im **lokalen Modus**: Startdaten kommen aus `data/ven
 4. In `js/config.js` die Projekt-URL und den **anon**-Schlüssel eintragen.
 5. Unter *Authentication → Providers* die öffentliche Registrierung abschalten, damit sich niemand selbst Konten anlegt.
 
-Bei einer schon eingerichteten Datenbank kommen Änderungen als Dateien in `supabase/migrations/`. Jede einmal im SQL-Editor ausführen.
+Bei einer schon eingerichteten Datenbank kommen Änderungen als Dateien in `supabase/migrations/`. Jede einmal im SQL-Editor ausführen, in der Reihenfolge der Dateinamen:
+
+1. `2026-11-10_maultaschen.sql`
+2. `2026-11-11_menu_uploads.sql`
+3. `2026-11-11_hinweise_loeschfrist.sql`
 
 Zugriffsregeln: Alle lesen aktive Lokale, Preise und freigegebene Meldungen. Alle dürfen Meldungen einreichen, die als `pending` ankommen. Schreiben und Freigeben dürfen nur Nutzer aus der Tabelle `admins`.
+
+## Datenschutz
+
+- Schriften, Leaflet und die Supabase-Bibliothek liegen in `vendor/` (keine Anfragen an Google oder CDNs).
+- Kein Tracking, keine Cookies außer der Anmelde-Sitzung im Admin-Bereich.
+- Hochgeladene Speisekarten werden gelöscht, sobald sie erledigt oder abgelehnt sind, spätestens nach 30 Tagen. Das passiert beim Öffnen des Admin-Bereichs.
+- Hinweise und Meldungen nach dem DSA kommen über das Formular „Hinweis“ (Link „Preis falsch? Für Gastronomen“ auf der Karte) in den Admin-Reiter „Hinweise“.
 
 ## Kartenkacheln
 
@@ -107,4 +122,4 @@ Im Betrieb über den Admin-Bereich. Im lokalen Modus stehen die Startdaten in `d
 
 - Preisverlauf öffentlich anzeigen (Daten sind schon da)
 - Preise aus hochgeladenen Speisekarten automatisch vorschlagen
-- Impressum und Datenschutzerklärung (vor dem öffentlichen Start Pflicht)
+- Impressum und Datenschutzerklärung: Entwürfe liegen bei (`impressum.html`, `datenschutz.html`). Platzhalter in [eckigen Klammern] ausfüllen und rechtlich prüfen lassen.
