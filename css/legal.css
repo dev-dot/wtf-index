@@ -7,8 +7,32 @@ body.legal { display: block; height: auto; }
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 56px;
   line-height: 1.6;
 }
-.legal-main h1 { font-family: var(--f-display); font-weight: 800; font-size: 32px; letter-spacing: -.02em; margin: 0 0 16px; }
+.legal-main h1 { font-family: var(--f-display); font-weight: 800; font-size: 32px; line-height: 1.15; letter-spacing: -.02em; margin: 0 0 16px; }
 .legal-main h2 { font-family: var(--f-display); font-weight: 800; font-size: 19px; margin: 28px 0 6px; }
 .legal-main p, .legal-main ul { margin: 0 0 10px; }
 .legal-main a { color: inherit; }
 .legal-main .muted { color: var(--muted); }
+.legal-foot {
+  max-width: 72ch; margin: 0 auto; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 16px 40px;
+}
+.legal-foot a { color: inherit; }
+.lead-text { font-size: 17px; color: var(--muted); }
+
+/* WTF-Report */
+.article-list { list-style: none; padding: 0; margin: 20px 0 0; display: grid; gap: 4px; }
+.article-list a { display: grid; gap: 2px; padding: 14px 0; border-top: 1px solid var(--line); text-decoration: none; }
+.article-list .date { font-size: 12px; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
+.article-list b { font-family: var(--f-display); font-size: 21px; letter-spacing: -.01em; text-wrap: balance; }
+.article-list a:hover b { text-decoration: underline; text-decoration-color: var(--brand); text-decoration-thickness: 3px; }
+.article-list span:last-child:not(.date) { color: var(--muted); }
+.article h1 { text-wrap: balance; }
+.article .teaser { font-size: 18px; font-weight: 500; }
+.article .body h2 { margin-top: 24px; }
+.article .body a { text-decoration-color: var(--brand); text-decoration-thickness: 2px; }
+.mentioned { margin-top: 28px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; display: grid; gap: 10px; }
+.mentioned > b { font-size: 12px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+.statement { margin-top: 6px; padding: 8px 10px; border-left: 3px solid var(--brand); background: var(--bg); border-radius: 0 6px 6px 0; font-size: 14px; white-space: pre-wrap; }
+.statement b { display: block; font-size: 11px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); white-space: normal; }
+.correction { margin-top: 20px; padding: 10px 12px; border: 1.5px solid var(--meh); border-radius: 6px; font-size: 14px; }
+.corr-list { font-size: 14px; }

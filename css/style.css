@@ -176,3 +176,8 @@ button,input,select,textarea{font:inherit;color:inherit}
 .field textarea{border:1.5px solid var(--line);background:var(--bg);border-radius:6px;padding:9px 10px;width:100%;box-sizing:border-box;resize:vertical;font:inherit;color:inherit}
 #modeHint{display:grid;gap:14px}
 #modeHint .hint a{color:inherit}
+.nav-link{font-size:13px;font-weight:600;color:var(--ink);text-decoration:none;border-bottom:2px solid var(--brand);white-space:nowrap}
+.nav-link:hover{border-bottom-color:var(--ink)}
+.pop .corr{font-size:11px;color:var(--meh);font-weight:600}
+.pop .statement{margin-top:8px;padding:8px 10px;border-left:3px solid var(--brand);background:var(--bg);border-radius:0 6px 6px 0;font-size:12px;white-space:pre-wrap}
+.pop .statement b{display:block;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:2px;white-space:normal}

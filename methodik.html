@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>So arbeiten wir · WTF-Index</title>
+<meta name="description" content="Wie der WTF-Index Lokale auswählt, Preise erhebt und bewertet.">
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/legal.css">
+</head>
+<body class="legal">
+<header class="top">
+  <a class="brand" href="./"><span class="logo">WTF-Index</span><span class="brand-text"><b>So arbeiten wir</b><span>Zurück zur Karte</span></span></a>
+</header>
+<main class="legal-main">
+  <!-- ENTWURF: Mit der Redaktion abstimmen. Aussagen in [eckigen Klammern] prüfen und anpassen. -->
+  <h1>So arbeiten wir</h1>
+  <p class="lead-text">Der WTF-Index zeigt, was gutes Essen in Stuttgart kostet. Damit du den Zahlen trauen kannst, legen wir offen, wie sie entstehen.</p>
+
+  <h2>Welche Lokale aufgenommen werden</h2>
+  <p>Wir nehmen nur Restaurants und Imbisse auf, in denen es uns geschmeckt hat. Jemand aus der Redaktion hat dort gegessen, bevor ein Lokal auf der Karte erscheint. Vorschläge von Leserinnen und Lesern probieren wir aus. Ob wir sie aufnehmen, entscheidet die Redaktion.</p>
+  <p>Der Index ist deshalb bewusst kein vollständiger Marktüberblick. Er vergleicht Lokale, die wir empfehlen würden.</p>
+
+  <h2>Unabhängigkeit</h2>
+  <ul>
+    <li>Niemand kann sich in den WTF-Index einkaufen. Aufnahme, Platzierung und Bewertung sind nicht käuflich.</li>
+    <li>Wir bezahlen unser Essen selbst. [Einladungen lehnen wir ab bzw. kennzeichnen sie.]</li>
+    <li>Auf der Seite gibt es keine Werbung. [Sollte sich das ändern, ist Werbung klar als solche gekennzeichnet und getrennt von redaktionellen Inhalten.]</li>
+  </ul>
+
+  <h2>Wie wir Preise erheben</h2>
+  <ul>
+    <li><b>Quellen:</b> Speisekarten im Lokal oder auf der Website des Lokals, eigene Besuche, Angaben der Lokale und geprüfte Meldungen von Besucherinnen und Besuchern.</li>
+    <li><b>Stand:</b> Bei jedem Preis steht, woher er stammt und von wann er ist. Karten, die älter als ein Jahr sind, kennzeichnen wir als „alte Karte“.</li>
+    <li><b>Vergleichbarkeit:</b> Für jeden Index gilt eine feste Regel, zum Beispiel Wasser 0,75 l, Bier 0,3 l oder 0,5 l (Pils, Helles oder Export, kein Weizen), Döner im Brot ohne Extras, Margherita nur in Pizzerien.</li>
+    <li><b>Besucher-Meldungen</b> prüfen wir, bevor sie erscheinen. Eine Meldung ersetzt den Speisekarten-Preis nur, wenn sie neuer ist.</li>
+    <li><b>Eingesandte Speisekarten</b> sind Recherchematerial. Wir veröffentlichen sie nicht und nennen nicht, wer sie geschickt hat. Die Dateien löschen wir, sobald die Preise eingetragen sind.</li>
+  </ul>
+
+  <h2>Wie die Bewertung entsteht</h2>
+  <p>Für jeden Index berechnen wir den Median aller aufgenommenen Lokale: Die Hälfte ist günstiger, die Hälfte teurer. Daraus ergibt sich die Einstufung:</p>
+  <ul>
+    <li><b>Fair:</b> unter 95 % des Medians</li>
+    <li><b>Geht so:</b> 95 bis 112 % des Medians</li>
+    <li><b>WTF?!:</b> mehr als 112 % des Medians</li>
+  </ul>
+  <p>„WTF?!“ heißt: Für das, was es ist, ist es im Vergleich teuer. Es heißt nicht, dass das Essen schlecht ist. Schlecht ist es bei uns nie, sonst wäre das Lokal nicht auf der Karte.</p>
+
+  <h2>Stellungnahmen der Lokale</h2>
+  <p>Bevor wir ein Lokal in einem Beitrag besonders kritisch herausstellen, bitten wir es um eine Stellungnahme. Lokale können uns jederzeit eine Stellungnahme oder Gegendarstellung schicken. Wir zeigen sie im Info-Fenster des Lokals unter „Das sagt das Lokal“, unverändert und ohne Kommentar.</p>
+
+  <h2>Korrekturen</h2>
+  <p>Wenn uns ein Fehler unterläuft, korrigieren wir ihn sichtbar und ändern ihn nicht still. Korrigierte Preise tragen einen Hinweis, Korrekturen in Beiträgen stehen unter dem Beitrag.</p>
+  <div id="corrections"><p class="muted">Lädt die letzten Korrekturen …</p></div>
+
+  <h2>Kontakt</h2>
+  <p>Fehler gefunden, eine Stellungnahme oder einen Tipp? Schreib uns über das <a href="./#hinweis">Hinweis-Formular</a> oder an [kontakt@wtf-index.de]. Verantwortlich im Sinne von § 18 Abs. 2 MStV ist [Vorname Nachname], siehe <a href="impressum.html">Impressum</a>.</p>
+  <p>[Optional: Wir haben uns zur Einhaltung des Pressekodex des Deutschen Presserats verpflichtet.]</p>
+</main>
+<footer class="legal-foot">
+  <a href="beitraege.html">WTF-Report</a> · <a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a>
+</footer>
+<script type="module">
+  import { createBackend } from "./js/backend.js";
+  import { ITEMS, esc, fmt } from "./js/model.js";
+  const box = document.getElementById("corrections");
+  try {
+    const backend = await createBackend();
+    const { venues, prices } = await backend.loadAll();
+    const name = id => (venues.find(v => v.id === id) || {}).name;
+    const list = prices.filter(p => p.correction && name(p.venueId)).sort((a, b) => (a.validFrom < b.validFrom ? 1 : -1)).slice(0, 20);
+    box.innerHTML = list.length
+      ? '<ul class="corr-list">' + list.map(p => "<li><b>" + esc(name(p.venueId)) + "</b>, " + esc(ITEMS[p.item]?.title || p.item) + ": jetzt " + fmt(p.price) + ". " + esc(p.correction) +
+          ' <span class="muted">(' + new Date(p.createdAt || p.validFrom).toLocaleDateString("de-DE") + ")</span></li>").join("") + "</ul>"
+      : '<p class="muted">Bisher keine Korrekturen.</p>';
+  } catch { box.innerHTML = ""; }
+</script>
+</body>
+</html>

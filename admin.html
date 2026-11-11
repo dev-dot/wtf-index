@@ -20,6 +20,7 @@
     <button type="button" class="chip" data-tab="reports" aria-pressed="true"><b>Meldungen</b><small id="pendingCount">–</small></button>
     <button type="button" class="chip" data-tab="menus" aria-pressed="false"><b>Speisekarten</b><small id="menuCount">–</small></button>
     <button type="button" class="chip" data-tab="notices" aria-pressed="false"><b>Hinweise</b><small id="noticeCount">–</small></button>
+    <button type="button" class="chip" data-tab="articles" aria-pressed="false"><b>Beiträge</b><small id="articleCount">–</small></button>
     <button type="button" class="chip" data-tab="venues" aria-pressed="false"><b>Lokale</b><small id="venueCount">–</small></button>
   </nav>
   <div class="admin-actions">
@@ -103,6 +104,44 @@
     <p class="empty" id="noticesEmpty" hidden>Keine Hinweise in dieser Ansicht.</p>
   </section>
 
+  <!-- Beiträge -->
+  <section id="articlesView" class="venues-layout" hidden>
+    <aside class="venue-list card">
+      <div class="venue-list-head">
+        <button type="button" class="btn primary" id="newArticle">+ Neuer Beitrag</button>
+      </div>
+      <ul id="articleList"></ul>
+    </aside>
+    <div class="venue-editor">
+      <p class="empty" id="articleEmpty">Wähle links einen Beitrag oder schreibe einen neuen.</p>
+      <form class="card form" id="articleForm" novalidate hidden>
+        <div class="view-head"><h2 id="aHead">Beitrag</h2><a class="muted" id="aLink" href="#" target="_blank" hidden>Öffentlich ansehen ↗</a></div>
+        <div class="field"><label for="aTitle">Titel</label><input id="aTitle" maxlength="140" required></div>
+        <div class="grid2">
+          <div class="field"><label for="aSlug">Adresse</label><input id="aSlug" maxlength="80" pattern="[a-z0-9-]{3,80}"><span class="hint">beitraege.html#<span id="aSlugPreview"></span></span></div>
+          <div class="field"><label for="aAuthor">Autor:in</label><input id="aAuthor" maxlength="100"></div>
+        </div>
+        <div class="field"><label for="aTeaser">Vorspann</label><textarea id="aTeaser" rows="2" maxlength="400"></textarea></div>
+        <div class="field"><label for="aBody">Text</label><textarea id="aBody" rows="16" maxlength="40000"></textarea>
+          <span class="hint">Leerzeile = neuer Absatz · <code>## Zwischentitel</code> · <code>- Aufzählung</code> · <code>**fett**</code> · <code>_kursiv_</code> · <code>[Linktext](https://…)</code></span></div>
+        <div class="field"><span class="label">Erwähnte Lokale</span><div class="checks" id="aVenues"></div>
+          <span class="hint">Werden unter dem Beitrag verlinkt. Vor scharfer Kritik das Lokal um eine Stellungnahme bitten und sie veröffentlichen.</span></div>
+        <div class="grid2">
+          <div class="field"><label for="aStatus">Status</label><select id="aStatus"><option value="draft">Entwurf</option><option value="published">Veröffentlicht</option></select></div>
+          <div class="field"><label for="aDate">Veröffentlicht am</label><input type="datetime-local" id="aDate"></div>
+        </div>
+        <div class="field"><label for="aCorrection">Korrektur (optional)</label><input id="aCorrection" maxlength="600" placeholder="z. B. In einer früheren Fassung stand 9,90 € statt 9,50 €."><span class="hint">Wird sichtbar unter dem Beitrag gezeigt. Fehler offen korrigieren, nicht still ändern.</span></div>
+        <div class="msg" id="aMsg" hidden></div>
+        <div class="actions">
+          <button type="button" class="btn bad" id="aDelete">Löschen</button>
+          <button type="button" class="btn" id="aPreviewBtn">Vorschau</button>
+          <button type="submit" class="btn primary" id="aSave">Speichern</button>
+        </div>
+      </form>
+      <article class="card article-preview" id="aPreview" hidden></article>
+    </div>
+  </section>
+
   <!-- Lokale -->
   <section id="venuesView" class="venues-layout" hidden>
     <aside class="venue-list card">
@@ -138,6 +177,12 @@
         </div>
         <label class="check"><input type="checkbox" id="vActive"> Probiert und für gut befunden: auf der Karte zeigen</label>
         <span class="hint">Voraussetzung für den WTF-Index: Das Essen schmeckt. Neue Lokale bleiben ausgeblendet, bis jemand vom Team dort gegessen hat.</span>
+        <div class="field">
+          <label for="vStatement">Das sagt das Lokal (Stellungnahme oder Gegendarstellung)</label>
+          <textarea id="vStatement" rows="3" maxlength="1500" placeholder="Wortlaut der Stellungnahme des Lokals. Erscheint im Info-Fenster auf der Karte."></textarea>
+          <div class="inline statement-date"><label for="vStatementDate">Eingegangen am</label><input type="date" id="vStatementDate"></div>
+          <span class="hint">Gegendarstellungen (§ 20 MStV) unverändert und ohne Kommentar übernehmen.</span>
+        </div>
         <div class="msg" id="vMsg" hidden></div>
         <div class="actions"><button type="submit" class="btn primary" id="vSave">Lokal speichern</button></div>
       </form>

@@ -109,5 +109,11 @@ code { font-family: var(--f-mono); font-size: .92em; background: var(--bg); padd
 .menu-files a { display: grid; place-items: center; width: 88px; height: 88px; border: 1.5px solid var(--line); border-radius: 6px; background: var(--bg); overflow: hidden; color: var(--ink); text-decoration: none; font-size: 12px; font-weight: 600; text-align: center; }
 .menu-files a img { width: 100%; height: 100%; object-fit: cover; }
 .menu-card .acts { display: flex; flex-wrap: wrap; gap: 6px; }
+.statement-date { align-items: center; margin-top: 6px; }
+.statement-date label { text-transform: none; letter-spacing: 0; font-weight: 400; font-size: 13px; white-space: nowrap; }
+.statement-date input { max-width: 200px; }
+.hist .corr { color: var(--meh); }
+.article-preview h1 { margin-bottom: 6px; }
+.article-preview .body { max-width: 68ch; line-height: 1.6; }
 .notice-msg { white-space: pre-wrap; font-size: 14px; }
 .sel { user-select: all; font-family: var(--f-mono); font-size: 12px; }

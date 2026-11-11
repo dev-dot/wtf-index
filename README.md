@@ -8,6 +8,16 @@ Die Preise stammen aus Speisekarten, Angaben des WTF-Teams und geprüften Besuch
 
 Der WTF-Index ist **kuratiert**: Aufgenommen werden nur Restaurants und Imbisse, in denen das Essen gut schmeckt. Neue Lokale (auch Vorschläge von Besuchern) bleiben im Admin-Bereich ausgeblendet, bis jemand vom Team dort gegessen und sie freigeschaltet hat. Der Index zeigt also, was *gutes* Essen in Stuttgart kostet, und ist kein vollständiger Marktüberblick.
 
+## Journalistischer Anspruch
+
+Der WTF-Index versteht sich als journalistisch-redaktionelles Angebot (Verantwortliche nach § 18 Abs. 2 MStV im Impressum):
+
+- **So arbeiten wir** (`methodik.html`): Auswahl, Unabhängigkeit, Preiserhebung, Bewertung, Stellungnahmen, Korrekturen
+- **WTF-Report** (`beitraege.html`): redaktionelle Beiträge, im Admin-Bereich unter „Beiträge“ geschrieben
+- **Das sagt das Lokal:** Stellungnahmen und Gegendarstellungen der Lokale, im Info-Fenster sichtbar
+- **Sichtbare Korrekturen** an Preisen und Beiträgen statt stiller Änderungen
+- Aufnahme und Bewertung sind nicht käuflich
+
 ## Indizes und Regeln
 
 | Index | Was zählt |
@@ -82,6 +92,7 @@ Bei einer schon eingerichteten Datenbank kommen Änderungen als Dateien in `supa
 1. `2026-11-10_maultaschen.sql`
 2. `2026-11-11_menu_uploads.sql`
 3. `2026-11-11_hinweise_loeschfrist.sql`
+4. `2026-11-12_redaktion.sql`
 
 Zugriffsregeln: Alle lesen aktive Lokale, Preise und freigegebene Meldungen. Alle dürfen Meldungen einreichen, die als `pending` ankommen. Schreiben und Freigeben dürfen nur Nutzer aus der Tabelle `admins`.
 

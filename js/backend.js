@@ -25,16 +25,18 @@ async function supabaseBackend() {
     id: r.id, name: r.name, type: r.type, district: r.district || "", address: r.address || "",
     location: r.lat != null && r.lon != null ? { lat: r.lat, lon: r.lon } : null,
     notes: r.notes || {}, wanted: r.wanted || [], active: r.active,
+    statement: r.statement || null, statementDate: r.statement_date || null,
   });
   const venueTo = v => ({
     id: v.id, name: v.name, type: v.type, district: v.district, address: v.address,
     lat: v.location ? v.location.lat : null, lon: v.location ? v.location.lon : null,
     notes: v.notes || {}, wanted: v.wanted || [], active: v.active !== false, updated_at: new Date().toISOString(),
+    ...(v.statement !== undefined ? { statement: v.statement || null, statement_date: v.statementDate || null } : {}),
   });
   const priceFrom = r => ({
     id: r.id, venueId: r.venue_id, item: r.item, price: Number(r.price), tap: r.tap, note: r.note,
     sourceLabel: r.source_label, sourceUrl: r.source_url, validFrom: r.valid_from, standLabel: r.stand_label,
-    outdated: r.outdated, createdAt: Date.parse(r.created_at),
+    outdated: r.outdated, correction: r.correction || null, createdAt: Date.parse(r.created_at),
   });
   const reportFrom = r => ({
     id: r.id, venueId: r.venue_id, item: r.item, price: Number(r.price), tap: r.tap, note: r.note,
@@ -75,6 +77,7 @@ async function supabaseBackend() {
       const row = must(await sb.from("prices").insert({
         venue_id: p.venueId, item: p.item, price: p.price, tap: p.tap, note: p.note, source_label: p.sourceLabel,
         source_url: p.sourceUrl, valid_from: p.validFrom, stand_label: p.standLabel, outdated: !!p.outdated,
+        ...(p.correction ? { correction: p.correction } : {}),
       }).select().single());
       return priceFrom(row);
     },
@@ -110,6 +113,23 @@ async function supabaseBackend() {
       must(await sb.from("menu_uploads").update({ files_deleted_at: new Date().toISOString() }).eq("id", m.id));
     },
 
+    // --- Beiträge ---
+    async listArticles({ all = false } = {}) {
+      let q = sb.from("articles").select("*").order("published_at", { ascending: false, nullsFirst: true }).limit(200);
+      if (!all) q = q.eq("status", "published");
+      return must(await q).map(articleFrom);
+    },
+    async saveArticle(a) {
+      const row = {
+        slug: a.slug, title: a.title, teaser: a.teaser || null, body: a.body || "", author: a.author || null,
+        venue_ids: a.venueIds || [], status: a.status, published_at: a.publishedAt ? new Date(a.publishedAt).toISOString() : null,
+        correction: a.correction || null, updated_at: new Date().toISOString(),
+      };
+      const res = a.id ? await sb.from("articles").update(row).eq("id", a.id).select().single() : await sb.from("articles").insert(row).select().single();
+      return articleFrom(must(res));
+    },
+    async deleteArticle(id) { must(await sb.from("articles").delete().eq("id", id)); },
+
     // --- Hinweise ---
     async addNotice(n) {
       must(await sb.from("notices").insert({
@@ -129,6 +149,11 @@ async function supabaseBackend() {
   };
 }
 
+const articleFrom = r => ({
+  id: r.id, slug: r.slug, title: r.title, teaser: r.teaser, body: r.body, author: r.author, venueIds: r.venue_ids || [],
+  status: r.status, publishedAt: r.published_at ? Date.parse(r.published_at) : null, correction: r.correction,
+  updatedAt: Date.parse(r.updated_at),
+});
 const menuFrom = r => ({
   id: r.id, venueId: r.venue_id, venueName: r.venue_name, venueAddress: r.venue_address, stand: r.stand, note: r.note,
   files: r.files || [], fileNames: r.file_names || [], status: r.status, createdAt: Date.parse(r.created_at),
@@ -151,7 +176,7 @@ async function localBackend() {
   const base = fromJson(json);
   // Überlagerung: geänderte/neue Lokale, zusätzliche Preise, gelöschte Preis-IDs, Meldungen
   let db = readLocal() || { venues: {}, prices: [], deleted: [], reports: [] };
-  db.menus = db.menus || []; db.files = db.files || {}; db.notices = db.notices || [];
+  db.menus = db.menus || []; db.files = db.files || {}; db.notices = db.notices || []; db.articles = db.articles || [];
   const save = () => writeLocal(db);
   const all = () => {
     const venues = base.venues.filter(v => !db.venues[v.id]).concat(Object.values(db.venues));
@@ -215,12 +240,24 @@ async function localBackend() {
       const x = db.menus.find(y => y.id === m.id); if (x) x.filesDeletedAt = Date.now();
       save();
     },
+    async listArticles({ all = false } = {}) {
+      return db.articles.filter(a => all || (a.status === "published" && a.publishedAt <= Date.now()))
+        .sort((a, b) => (b.publishedAt || Infinity) - (a.publishedAt || Infinity));
+    },
+    async saveArticle(a) {
+      if (db.articles.some(x => x.slug === a.slug && x.id !== a.id)) { const e = new Error("duplicate slug"); e.userMessage = "Diese Adresse (Slug) gibt es schon."; throw e; }
+      const row = { ...a, id: a.id || uid(), updatedAt: Date.now() };
+      const i = db.articles.findIndex(x => x.id === row.id);
+      if (i >= 0) db.articles[i] = row; else db.articles.unshift(row);
+      save(); return row;
+    },
+    async deleteArticle(id) { db.articles = db.articles.filter(a => a.id !== id); save(); },
     async addNotice(n) { db.notices.unshift({ ...n, id: uid(), status: "open", createdAt: Date.now() }); save(); },
     async listNotices(status) { return db.notices.filter(n => n.status === status); },
     async setNoticeStatus(id, status) { const n = db.notices.find(x => x.id === id); if (n) { n.status = status; save(); } },
     // Nur lokal: Stand als venues.json exportieren bzw. Änderungen verwerfen
     exportJson() { const { venues, prices } = all(); return toJson(venues, prices); },
     hasChanges() { return Object.keys(db.venues).length + db.prices.length + db.deleted.length > 0; },
-    resetChanges() { db = { venues: {}, prices: [], deleted: [], reports: db.reports, menus: db.menus, files: db.files, notices: db.notices }; save(); },
+    resetChanges() { db = { venues: {}, prices: [], deleted: [], reports: db.reports, menus: db.menus, files: db.files, notices: db.notices, articles: db.articles }; save(); },
   };
 }

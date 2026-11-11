@@ -67,10 +67,12 @@ function popupHtml(v) {
     (its.length ? "<table>" + its.map(x => '<tr class="' + (x.it === current ? "cur" : "") + '"><td>' + ITEMS[x.it].title +
       (isBeer(x.it) && x.e.tap ? " (" + tapLabel(x.e, "").trim() + ")" : "") +
       (x.e.note ? '<br><span class="src">' + esc(x.e.note) + "</span>" : "") + "<br>" + srcLabel(v, x.e, ", ") +
+      (x.e.p && x.e.p.correction ? '<br><span class="corr">Korrigiert: ' + esc(x.e.p.correction) + "</span>" : "") +
       "</td><td>" + fmt(x.e.price) + "</td></tr>").join("") + "</table>" : "") +
     (hasCur ? "" : '<div class="reports">' + (v.notes[current] ? esc(v.notes[current]) : "Noch kein Preis für " + ITEMS[current].title + ".") + "</div>") +
     (rep.length ? '<div class="reports"><b>Letzte Meldungen · ' + ITEMS[current].title + "</b>" +
       rep.map(r => fmt(r.price) + " am " + fmtDate(r.createdAt) + (r.note ? " – „" + esc(r.note) + "“" : "")).join("<br>") + "</div>" : "") +
+    (v.statement ? '<div class="statement"><b>Das sagt das Lokal' + (v.statementDate ? " (" + new Date(v.statementDate + "T12:00:00").toLocaleDateString("de-DE") + ")" : "") + "</b>" + esc(v.statement) + "</div>" : "") +
     '<div class="reports">' + (v.prices[current] && v.prices[current].sourceUrl ? '<a href="' + esc(v.prices[current].sourceUrl) + '" target="_blank" rel="noopener">Quelle: ' + esc(v.prices[current].sourceLabel || "Link") + " ↗</a><br>" : "") +
     (osm ? '<a href="' + osm + '" target="_blank" rel="noopener">In OpenStreetMap ansehen ↗</a>' : "") + "</div>" +
     '<button type="button" data-report="' + v.id + '">Preis für ' + ITEMS[current].label + " melden</button>" +

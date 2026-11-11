@@ -39,13 +39,14 @@ export function fromJson(json) {
     venues.push({
       id: v.id, name: v.name, type: v.type, district: v.district || "", address: v.address || "",
       location: v.location || null, notes: { ...(v.notes || {}) }, wanted: v.wanted || [], active: v.active !== false,
+      statement: v.statement || null, statementDate: v.statementDate || null,
     });
     const push = (item, p, src, i) => prices.push({
       id: p.id || `${v.id}-${item}-${src.date || "seed"}-${i}`, venueId: v.id, item, price: p.price, tap: p.tap || null,
       note: p.note ?? (v.notes || {})[item] ?? null,
       sourceLabel: p.sourceLabel ?? src.label ?? null, sourceUrl: p.sourceUrl ?? src.url ?? null,
       validFrom: p.validFrom ?? src.date ?? "2026-01-01", standLabel: p.standLabel ?? src.stand ?? null,
-      outdated: p.outdated ?? !!src.outdated, createdAt: p.createdAt || 0,
+      outdated: p.outdated ?? !!src.outdated, correction: p.correction || null, createdAt: p.createdAt || 0,
     });
     for (const [item, p] of Object.entries(v.prices || {})) push(item, p, v.source || {}, 0);
     (v.history || []).forEach((p, i) => push(p.item, p, {}, i + 1));
@@ -68,6 +69,7 @@ export function toJson(venues, prices, collected = new Date().toISOString().slic
         prices: {}, notes: { ...v.notes },
       };
       if (!v.active) out.active = false;
+      if (v.statement) { out.statement = v.statement; out.statementDate = v.statementDate; }
       if (v.wanted && v.wanted.length) out.wanted = v.wanted;
       const history = [];
       for (const p of mine) {
@@ -76,6 +78,7 @@ export function toJson(venues, prices, collected = new Date().toISOString().slic
         if (p.note) slim.note = p.note;
         Object.assign(slim, { sourceLabel: p.sourceLabel, sourceUrl: p.sourceUrl, validFrom: p.validFrom, standLabel: p.standLabel });
         if (p.outdated) slim.outdated = true;
+        if (p.correction) slim.correction = p.correction;
         if (cur[v.id + "|" + p.item] === p) out.prices[p.item] = slim;
         else history.push({ item: p.item, ...slim });
       }
@@ -85,10 +88,10 @@ export function toJson(venues, prices, collected = new Date().toISOString().slic
   };
 }
 
-export function slugify(name) {
+export function slugify(name, max = 40) {
   return name.toLowerCase()
     .replace(/ä/g, "ae").replace(/ö/g, "oe").replace(/ü/g, "ue").replace(/ß/g, "ss")
-    .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40) || "lokal";
+    .replace(/[^a-z0-9]+/g, "-").slice(0, max).replace(/^-+|-+$/g, "") || "lokal";
 }
 
 export const fmt = n => n.toFixed(2).replace(".", ",") + " €";

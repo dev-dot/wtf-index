@@ -1,5 +1,6 @@
 import { CONFIG } from "./config.js";
 import { createBackend } from "./backend.js";
+import { renderBody } from "./markup.js";
 import { ITEMS, ITEM_KEYS, isBeer, VENUE_TYPES, SOURCE_LABELS, currentPrices, slugify, fmt, esc, priceOk } from "./model.js";
 
 const $ = id => document.getElementById(id);
@@ -8,7 +9,7 @@ const fmtDay = s => new Date(s.length === 10 ? s + "T12:00:00" : s).toLocaleDate
 const fmtTs = ms => new Date(ms).toLocaleString("de-DE", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
 
 let backend, venues = [], prices = [], tab = "reports", reportStatus = "pending", editing = null, isNew = false;
-let pickMap, pickMarker;
+let pickMap, pickMarker, articles = [], editingArticle = null;
 
 /* ---------- Hilfen ---------- */
 let toastT;
@@ -32,7 +33,7 @@ async function boot() {
 
 async function route() {
   const user = await backend.getUser();
-  ["loginView", "noAdminView", "reportsView", "menusView", "noticesView", "venuesView"].forEach(id => ($(id).hidden = true));
+  ["loginView", "noAdminView", "reportsView", "menusView", "noticesView", "articlesView", "venuesView"].forEach(id => ($(id).hidden = true));
   $("tabs").hidden = true;
   $("logout").hidden = !user || backend.mode === "local";
   $("who").textContent = backend.mode === "local" ? "Lokaler Modus" : user ? user.email : "Nicht angemeldet";
@@ -73,6 +74,11 @@ async function reload() {
     const open = await backend.listNotices("open");
     $("noticeCount").textContent = open.length ? open.length + " offen" : "keine offen";
   } catch { $("noticeCount").textContent = "nicht eingerichtet"; }
+  try {
+    articles = await backend.listArticles({ all: true });
+    const pub = articles.filter(a => a.status === "published").length;
+    $("articleCount").textContent = articles.length ? pub + " veröffentlicht" : "noch keine";
+  } catch { articles = null; $("articleCount").textContent = "nicht eingerichtet"; }
 }
 
 // Löschfrist: Dateien eingereichter Speisekarten nach Erledigen/Ablehnen löschen, spätestens nach 30 Tagen.
@@ -97,9 +103,11 @@ function showTab(t) {
   $("venuesView").hidden = t !== "venues";
   $("menusView").hidden = t !== "menus";
   $("noticesView").hidden = t !== "notices";
+  $("articlesView").hidden = t !== "articles";
   if (t === "reports") renderReports();
   else if (t === "menus") renderMenus();
   else if (t === "notices") renderNotices();
+  else if (t === "articles") renderArticleList();
   else { renderVenueList(); if (pickMap) setTimeout(() => pickMap.invalidateSize(), 0); }
 }
 $("tabs").addEventListener("click", e => { const c = e.target.closest(".chip"); if (c) showTab(c.dataset.tab); });
@@ -268,6 +276,79 @@ $("noticeCards").addEventListener("click", async e => {
   if (op) { showTab("venues"); openVenue(op.dataset.open); }
 });
 
+/* ---------- Beiträge ---------- */
+const toLocalInput = ms => { const d = new Date(ms - new Date(ms).getTimezoneOffset() * 60000); return d.toISOString().slice(0, 16); };
+function renderArticleList() {
+  if (articles === null) {
+    $("articleList").innerHTML = '<li class="muted">Beiträge lassen sich noch nicht laden. Ist die Migration <code>2026-11-12_redaktion.sql</code> ausgeführt?</li>';
+    return;
+  }
+  $("articleList").innerHTML = articles.map(a => '<li data-id="' + a.id + '" class="' + (editingArticle && editingArticle.id === a.id ? "active" : "") + '" tabindex="0"><b>' + esc(a.title) +
+    "</b><small>" + (a.status === "published" ? "Veröffentlicht " + (a.publishedAt ? fmtTs(a.publishedAt) : "") : "Entwurf") + "</small></li>").join("") ||
+    '<li class="muted">Noch keine Beiträge.</li>';
+}
+function openArticle(a) {
+  editingArticle = a;
+  $("articleEmpty").hidden = true; $("articleForm").hidden = false; $("aPreview").hidden = true;
+  $("aHead").textContent = a.id ? a.title : "Neuer Beitrag";
+  delete $("aSlug").dataset.touched;
+  $("aTitle").value = a.title || ""; $("aSlug").value = a.slug || ""; $("aSlugPreview").textContent = a.slug || "";
+  $("aAuthor").value = a.author || ""; $("aTeaser").value = a.teaser || ""; $("aBody").value = a.body || "";
+  $("aStatus").value = a.status || "draft"; $("aDate").value = a.publishedAt ? toLocalInput(a.publishedAt) : "";
+  $("aCorrection").value = a.correction || "";
+  $("aVenues").innerHTML = venues.map(v => '<label class="check"><input type="checkbox" value="' + esc(v.id) + '"' + ((a.venueIds || []).includes(v.id) ? " checked" : "") + "> " + esc(v.name) + "</label>").join("");
+  $("aLink").hidden = !(a.id && a.status === "published"); $("aLink").href = "beitraege.html#" + (a.slug || "");
+  $("aDelete").hidden = !a.id; delete $("aDelete").dataset.confirm; $("aDelete").textContent = "Löschen";
+  msg($("aMsg"), ""); renderArticleList();
+}
+$("newArticle").addEventListener("click", () => { openArticle({ status: "draft", venueIds: [] }); $("aTitle").focus(); });
+$("articleList").addEventListener("click", e => { const li = e.target.closest("li[data-id]"); if (li) openArticle(articles.find(a => a.id === li.dataset.id)); });
+$("aTitle").addEventListener("input", () => {
+  if (!editingArticle.id && !$("aSlug").dataset.touched) { $("aSlug").value = slugify($("aTitle").value, 80); $("aSlugPreview").textContent = $("aSlug").value; }
+});
+$("aSlug").addEventListener("input", () => { $("aSlug").dataset.touched = "1"; $("aSlugPreview").textContent = $("aSlug").value; });
+$("aStatus").addEventListener("change", () => { if ($("aStatus").value === "published" && !$("aDate").value) $("aDate").value = toLocalInput(Date.now()); });
+function readArticleForm() {
+  return {
+    ...editingArticle,
+    title: $("aTitle").value.trim(), slug: $("aSlug").value.trim(), author: $("aAuthor").value.trim() || null,
+    teaser: $("aTeaser").value.trim() || null, body: $("aBody").value, status: $("aStatus").value,
+    publishedAt: $("aDate").value ? new Date($("aDate").value).getTime() : null,
+    correction: $("aCorrection").value.trim() || null,
+    venueIds: [...document.querySelectorAll("#aVenues input:checked")].map(c => c.value),
+  };
+}
+function articleHtml(a) {
+  const vs = (a.venueIds || []).map(id => venues.find(v => v.id === id)).filter(Boolean);
+  return "<h1>" + esc(a.title) + '</h1><p class="muted">' + esc([a.author, a.publishedAt && fmtTs(a.publishedAt)].filter(Boolean).join(" · ")) + "</p>" +
+    (a.teaser ? "<p><strong>" + esc(a.teaser) + "</strong></p>" : "") + '<div class="body">' + renderBody(a.body) + "</div>" +
+    (a.correction ? '<p class="muted"><b>Korrektur:</b> ' + esc(a.correction) + "</p>" : "") +
+    (vs.length ? '<p class="muted">Erwähnte Lokale: ' + vs.map(v => esc(v.name)).join(", ") + "</p>" : "");
+}
+$("aPreviewBtn").addEventListener("click", () => { const p = $("aPreview"); p.innerHTML = articleHtml(readArticleForm()); p.hidden = false; p.scrollIntoView({ behavior: "smooth", block: "start" }); });
+$("articleForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const a = readArticleForm();
+  if (a.title.length < 3) { msg($("aMsg"), "Bitte einen Titel eingeben.", true); $("aTitle").focus(); return; }
+  if (!/^[a-z0-9-]{3,80}$/.test(a.slug)) { msg($("aMsg"), "Die Adresse darf nur Kleinbuchstaben, Ziffern und Bindestriche enthalten (3–80 Zeichen).", true); $("aSlug").focus(); return; }
+  if (a.status === "published" && !a.publishedAt) a.publishedAt = Date.now();
+  $("aSave").disabled = true; msg($("aMsg"), "Speichert …");
+  try {
+    const saved = await backend.saveArticle(a);
+    await reload(); openArticle(articles.find(x => x.id === saved.id) || saved);
+    toast(saved.status === "published" ? "Gespeichert und veröffentlicht." : "Entwurf gespeichert.");
+  } catch (err) {
+    const t = err.userMessage || errText(err);
+    msg($("aMsg"), /duplicate|unique/i.test(t) ? "Diese Adresse gibt es schon. Bitte eine andere wählen." : "Speichern fehlgeschlagen: " + t, true);
+  } finally { $("aSave").disabled = false; }
+});
+$("aDelete").addEventListener("click", async () => {
+  const b = $("aDelete");
+  if (b.dataset.confirm !== "1") { b.dataset.confirm = "1"; b.textContent = "Wirklich löschen?"; return; }
+  try { await backend.deleteArticle(editingArticle.id); editingArticle = null; await reload(); $("articleForm").hidden = true; $("aPreview").hidden = true; $("articleEmpty").hidden = false; renderArticleList(); toast("Beitrag gelöscht."); }
+  catch (err) { toast("Löschen fehlgeschlagen: " + errText(err)); }
+});
+
 /* ---------- Lokale: Liste ---------- */
 function renderVenueList() {
   const q = $("vSearch").value.trim().toLowerCase();
@@ -324,6 +405,7 @@ function fillVenueForm() {
   $("vId").textContent = isNew ? "" : "ID " + v.id;
   $("vName").value = v.name; $("vType").value = v.type; $("vDistrict").value = v.district; $("vAddress").value = v.address;
   $("vActive").checked = v.active === true || (v.active !== false && !isNew);
+  $("vStatement").value = v.statement || ""; $("vStatementDate").value = v.statementDate || "";
   document.querySelectorAll("#vWanted input").forEach(c => (c.checked = (v.wanted || []).includes(c.value)));
   msg($("vMsg"), "");
   ensurePickMap();
@@ -363,6 +445,8 @@ $("venueForm").addEventListener("submit", async e => {
   const v = editing;
   v.name = $("vName").value.trim(); v.type = $("vType").value; v.district = $("vDistrict").value.trim(); v.address = $("vAddress").value.trim();
   v.active = $("vActive").checked;
+  v.statement = $("vStatement").value.trim() || null;
+  v.statementDate = v.statement ? ($("vStatementDate").value || today()) : null;
   v.wanted = [...document.querySelectorAll("#vWanted input:checked")].map(c => c.value);
   if (!v.name) { msg($("vMsg"), "Bitte einen Namen eingeben.", true); $("vName").focus(); return; }
   if (isNew) {
@@ -397,7 +481,8 @@ function renderPrices() {
       (mine.length ? '<ul class="hist">' + mine.map(p =>
         '<li class="' + (p === c ? "current" : "") + '"><span class="p">' + fmt(p.price) + "</span><span>" +
         esc([fmtDay(p.validFrom), p.sourceLabel, p.standLabel && "Stand " + p.standLabel, p.tap === "f" ? "Fass" : p.tap === "b" ? "Flasche" : "", p.outdated && "alte Karte", p.note].filter(Boolean).join(" · ")) +
-        '</span><button type="button" data-del="' + esc(p.id) + '">Löschen</button></li>').join("") + "</ul>" : "") +
+        (p.correction ? ' <span class="corr">· Korrigiert: ' + esc(p.correction) + "</span>" : "") +
+        '</span><button type="button" data-del="' + esc(p.id) + '" title="Nur für Tippfehler direkt nach dem Eintragen. Sonst neuen Preis mit Korrekturhinweis eintragen.">Löschen</button></li>').join("") + "</ul>" : "") +
       '<div class="field"><label for="note-' + it + '">Hinweis, solange kein Preis zählt</label>' +
       '<input id="note-' + it + '" data-note="' + it + '" value="' + esc((v.notes || {})[it] || "") + '" maxlength="160" placeholder="z. B. Nur 0,5 l im Angebot"></div>' +
       '<div class="pf-slot"></div></div>';
@@ -416,6 +501,8 @@ function priceFormHtml(it) {
     (isBeer(it) ? '<div class="field"><label>Ausschank</label><select name="tap"><option value="">nicht angegeben</option><option value="f">vom Fass</option><option value="b">Flasche</option></select></div>' : "<div></div>") +
     "</div>" +
     '<div class="field"><label>Hinweis (optional)</label><input name="note" maxlength="200" placeholder="z. B. San Marzano, Fior di Latte"></div>' +
+    '<div class="field"><label>Korrektur (optional)</label><input name="correction" maxlength="300" placeholder="z. B. Preis war 9,90 € statt 9,50 € (Tippfehler)">' +
+    '<span class="hint">Ausfüllen, wenn dieser Preis einen falschen ersetzt. Wird öffentlich angezeigt.</span></div>' +
     '<label class="check"><input type="checkbox" name="outdated"> Alte Karte (vor über einem Jahr)</label>' +
     '<div class="msg" hidden></div>' +
     '<div class="actions"><button type="button" class="btn" data-cancel>Abbrechen</button><button type="submit" class="btn primary">Preis speichern</button></div></form>';
@@ -450,7 +537,7 @@ $("priceItems").addEventListener("submit", async e => {
   const p = {
     venueId: editing.id, item: it, price: Math.round(price * 100) / 100, tap: f.tap ? f.tap.value || null : null,
     note: f.note.value.trim() || null, sourceLabel: f.sourceLabel.value.trim() || null, sourceUrl: url || null,
-    validFrom: f.validFrom.value, standLabel: f.standLabel.value.trim() || null, outdated: f.outdated.checked,
+    validFrom: f.validFrom.value, standLabel: f.standLabel.value.trim() || null, outdated: f.outdated.checked, correction: f.correction.value.trim() || null,
   };
   f.querySelector("[type=submit]").disabled = true; msg(m, "Speichert …");
   try {
