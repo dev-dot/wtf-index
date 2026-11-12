@@ -124,7 +124,9 @@
         <div class="field"><label for="aTeaser">Vorspann</label><textarea id="aTeaser" rows="2" maxlength="400"></textarea></div>
         <div class="field"><label for="aBody">Text</label><textarea id="aBody" rows="16" maxlength="40000"></textarea>
           <span class="hint">Leerzeile = neuer Absatz · <code>## Zwischentitel</code> · <code>- Aufzählung</code> · <code>**fett**</code> · <code>_kursiv_</code> · <code>[Linktext](https://…)</code></span></div>
-        <div class="field"><span class="label">Erwähnte Lokale</span><div class="checks" id="aVenues"></div>
+        <div class="field"><span class="label">Erwähnte Lokale</span>
+          <div class="detect" id="aDetect" hidden><span id="aDetectText"></span> <button type="button" class="btn small" id="aDetectBtn">Übernehmen</button></div>
+          <div class="checks" id="aVenues"></div>
           <span class="hint">Werden unter dem Beitrag verlinkt. Vor scharfer Kritik das Lokal um eine Stellungnahme bitten und sie veröffentlichen.</span></div>
         <div class="grid2">
           <div class="field"><label for="aStatus">Status</label><select id="aStatus"><option value="draft">Entwurf</option><option value="published">Veröffentlicht</option></select></div>

@@ -117,3 +117,4 @@ code { font-family: var(--f-mono); font-size: .92em; background: var(--bg); padd
 .article-preview .body { max-width: 68ch; line-height: 1.6; }
 .notice-msg { white-space: pre-wrap; font-size: 14px; }
 .sel { user-select: all; font-family: var(--f-mono); font-size: 12px; }
+.detect { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; font-size: 13px; background: var(--bg); border-left: 3px solid var(--brand); padding: 6px 10px; border-radius: 0 6px 6px 0; }

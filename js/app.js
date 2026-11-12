@@ -159,7 +159,17 @@ function setItem(it) {
 $("switch").innerHTML = Object.entries(ITEMS).map(([k, v]) =>
   '<button type="button" class="chip" data-it="' + k + '" aria-pressed="false"><b>' + (v.emoji ? '<span class="emo" aria-hidden="true">' + v.emoji + "</span> " : "") + v.label + "</b><small>" + v.chip + "</small></button>").join("");
 $("switch").addEventListener("click", e => { const c = e.target.closest(".chip"); if (c) setItem(c.dataset.it); });
-window.addEventListener("hashchange", () => { const h = location.hash.slice(1); if (ITEMS[h] && h !== current) setItem(h); });
+window.addEventListener("hashchange", () => { const h = location.hash.slice(1); if (ITEMS[h] && h !== current) setItem(h); else openVenueFromHash(); });
+// Direktlink auf ein Lokal: #v-<id> (z. B. aus Beiträgen)
+function openVenueFromHash() {
+  const m = /^#v-([a-z0-9-]+)$/.exec(location.hash); if (!m) return;
+  const v = VENUES.find(x => x.id === m[1]); if (!v) return;
+  const order = ["doener", "pizza", "maultaschen", "spaetzle", "bier", "bier3", "wasser"].filter(k => ITEMS[k]);
+  const it = effective(v, current) ? current : order.find(k => effective(v, k)) || current;
+  if (it !== current) { current = it; render(); }
+  history.replaceState(null, "", "#" + current);
+  setTimeout(() => select(v.id, true), 50);
+}
 $("list").addEventListener("click", e => { const r = e.target.closest(".row"); if (r) select(r.dataset.id, true); });
 $("list").addEventListener("keydown", e => {
   if ((e.key === "Enter" || e.key === " ") && e.target.classList.contains("row")) { e.preventDefault(); select(e.target.dataset.id, true); }
@@ -341,5 +351,6 @@ async function boot() {
   $("countTag").textContent = "Kuratiert · " + VENUES.length + " Lokale";
   render();
   if (location.hash === "#hinweis") openSheet(null, current, "hint");
+  else openVenueFromHash();
 }
 boot();

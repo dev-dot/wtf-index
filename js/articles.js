@@ -1,7 +1,29 @@
 // Öffentliche Beitragsseite: Liste (beitraege.html) und einzelner Beitrag (beitraege.html#adresse)
 import { createBackend } from "./backend.js";
 import { renderBody } from "./markup.js";
-import { esc } from "./model.js";
+import { esc, venueMatchName } from "./model.js";
+
+// Namen der erwähnten Lokale im Text hervorheben und mit der Karte verlinken (nur in Textknoten).
+function linkVenues(root, vs) {
+  const names = vs.map(v => ({ v, n: venueMatchName(v) })).filter(x => x.n.length >= 4).sort((a, b) => b.n.length - a.n.length);
+  if (!names.length) return;
+  const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const re = new RegExp("(" + names.map(x => escRe(x.n)).join("|") + ")", "gi");
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: n => (n.parentElement.closest("a") ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT) });
+  const nodes = []; while (walker.nextNode()) nodes.push(walker.currentNode);
+  for (const node of nodes) {
+    if (!re.test(node.nodeValue)) continue; re.lastIndex = 0;
+    const frag = document.createDocumentFragment();
+    node.nodeValue.split(re).forEach((part, i) => {
+      if (i % 2 === 0) { if (part) frag.appendChild(document.createTextNode(part)); return; }
+      const hit = names.find(x => x.n.toLowerCase() === part.toLowerCase());
+      const a = document.createElement("a");
+      a.href = "./#v-" + hit.v.id; a.className = "venue-link"; a.textContent = part; a.title = hit.v.name + " auf der Karte";
+      frag.appendChild(a);
+    });
+    node.replaceWith(frag);
+  }
+}
 
 const main = document.getElementById("main");
 const fmtDay = ms => new Date(ms).toLocaleDateString("de-DE", { day: "numeric", month: "long", year: "numeric" });
@@ -26,10 +48,11 @@ function articleView(a) {
     '<div class="body">' + renderBody(a.body) + "</div>" +
     (vs.length ? '<aside class="mentioned"><b>Lokale in diesem Beitrag</b>' + vs.map(v => {
       const st = v.statement ? '<div class="statement"><b>Das sagt das Lokal</b>' + esc(v.statement) + "</div>" : "";
-      return "<div>" + esc(v.name) + ' <span class="muted">' + esc(v.district || "") + "</span>" + st + "</div>";
+      return '<div><a class="venue-link" href="./#v-' + esc(v.id) + '">' + esc(v.name) + '</a> <span class="muted">' + esc(v.district || "") + "</span>" + st + "</div>";
     }).join("") + "</aside>" : "") +
     (a.correction ? '<p class="correction"><b>Korrektur:</b> ' + esc(a.correction) + "</p>" : "") +
     "</article>";
+  linkVenues(main.querySelector(".body"), vs);
   window.scrollTo(0, 0);
 }
 

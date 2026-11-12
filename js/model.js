@@ -97,3 +97,10 @@ export function slugify(name, max = 40) {
 export const fmt = n => n.toFixed(2).replace(".", ",") + " €";
 export const fmtShort = n => n.toFixed(2).replace(".", ",");
 export const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+// Lokale, deren Name im Text vorkommt (ohne Klammerzusatz, Groß-/Kleinschreibung egal).
+export const venueMatchName = v => v.name.replace(/\s*\(.*?\)\s*/g, " ").trim();
+export function venuesInText(text, venues) {
+  const t = String(text || "").toLowerCase();
+  return venues.filter(v => { const n = venueMatchName(v).toLowerCase(); return n.length >= 4 && t.includes(n); });
+}

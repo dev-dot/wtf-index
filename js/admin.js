@@ -1,6 +1,7 @@
 import { CONFIG } from "./config.js";
 import { createBackend } from "./backend.js";
 import { renderBody } from "./markup.js";
+import { venuesInText } from "./model.js";
 import { ITEMS, ITEM_KEYS, isBeer, VENUE_TYPES, SOURCE_LABELS, currentPrices, slugify, fmt, esc, priceOk } from "./model.js";
 
 const $ = id => document.getElementById(id);
@@ -296,6 +297,7 @@ function openArticle(a) {
   $("aAuthor").value = a.author || ""; $("aTeaser").value = a.teaser || ""; $("aBody").value = a.body || "";
   $("aStatus").value = a.status || "draft"; $("aDate").value = a.publishedAt ? toLocalInput(a.publishedAt) : "";
   $("aCorrection").value = a.correction || "";
+  setTimeout(updateDetect, 0);
   $("aVenues").innerHTML = venues.map(v => '<label class="check"><input type="checkbox" value="' + esc(v.id) + '"' + ((a.venueIds || []).includes(v.id) ? " checked" : "") + "> " + esc(v.name) + "</label>").join("");
   $("aLink").hidden = !(a.id && a.status === "published"); $("aLink").href = "beitraege.html#" + (a.slug || "");
   $("aDelete").hidden = !a.id; delete $("aDelete").dataset.confirm; $("aDelete").textContent = "Löschen";
@@ -308,6 +310,26 @@ $("aTitle").addEventListener("input", () => {
 });
 $("aSlug").addEventListener("input", () => { $("aSlug").dataset.touched = "1"; $("aSlugPreview").textContent = $("aSlug").value; });
 $("aStatus").addEventListener("change", () => { if ($("aStatus").value === "published" && !$("aDate").value) $("aDate").value = toLocalInput(Date.now()); });
+// Lokale, die im Text stehen, aber noch nicht angehakt sind
+function detectedMissing() {
+  const text = [$("aTitle").value, $("aTeaser").value, $("aBody").value].join("\n");
+  const checked = new Set([...document.querySelectorAll("#aVenues input:checked")].map(c => c.value));
+  return venuesInText(text, venues).filter(v => !checked.has(v.id));
+}
+function updateDetect() {
+  const miss = detectedMissing();
+  $("aDetect").hidden = !miss.length;
+  $("aDetectText").textContent = miss.length ? "Im Text erwähnt, aber nicht angehakt: " + miss.map(v => v.name).join(", ") : "";
+}
+let detectT;
+["aTitle", "aTeaser", "aBody"].forEach(id => $(id).addEventListener("input", () => { clearTimeout(detectT); detectT = setTimeout(updateDetect, 300); }));
+$("aVenues").addEventListener("change", updateDetect);
+$("aDetectBtn").addEventListener("click", () => {
+  const ids = new Set(detectedMissing().map(v => v.id));
+  document.querySelectorAll("#aVenues input").forEach(c => { if (ids.has(c.value)) c.checked = true; });
+  updateDetect();
+});
+
 function readArticleForm() {
   return {
     ...editingArticle,
@@ -332,6 +354,9 @@ $("articleForm").addEventListener("submit", async e => {
   if (a.title.length < 3) { msg($("aMsg"), "Bitte einen Titel eingeben.", true); $("aTitle").focus(); return; }
   if (!/^[a-z0-9-]{3,80}$/.test(a.slug)) { msg($("aMsg"), "Die Adresse darf nur Kleinbuchstaben, Ziffern und Bindestriche enthalten (3–80 Zeichen).", true); $("aSlug").focus(); return; }
   if (a.status === "published" && !a.publishedAt) a.publishedAt = Date.now();
+  // Im Text genannte Lokale automatisch mit verknüpfen
+  const auto = detectedMissing().map(v => v.id);
+  if (auto.length) a.venueIds = [...new Set([...(a.venueIds || []), ...auto])];
   $("aSave").disabled = true; msg($("aMsg"), "Speichert …");
   try {
     const saved = await backend.saveArticle(a);

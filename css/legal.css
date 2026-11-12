@@ -36,3 +36,5 @@ body.legal { display: block; height: auto; }
 .statement b { display: block; font-size: 11px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); white-space: normal; }
 .correction { margin-top: 20px; padding: 10px 12px; border: 1.5px solid var(--meh); border-radius: 6px; font-size: 14px; }
 .corr-list { font-size: 14px; }
+.venue-link { background: linear-gradient(transparent 60%, var(--brand) 60%); color: inherit; text-decoration: none; padding: 0 1px; }
+.venue-link:hover { background: var(--brand); color: var(--brand-ink); }
