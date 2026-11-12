@@ -12,8 +12,8 @@
   --ink:#000000; --muted:#6C6C70;
   /* Trennlinien und Füllflächen (separator / tertiarySystemFill) */
   --line:#C6C6C8; --fill:rgba(118,118,128,.12); --fill-strong:rgba(118,118,128,.2);
-  /* Akzent (systemBlue) und Marke (systemYellow) */
-  --tint:#007AFF; --tint-ink:#FFFFFF; --brand:#FFCC00; --brand-ink:#000000;
+  /* Akzent = Markengelb (systemYellow); auf Gelb schwarze Schrift, für Links ein dunkles Gelb */
+  --tint:#FFCC00; --tint-ink:#000000; --tint-text:#8A6D00; --brand:#FFCC00; --brand-ink:#000000;
   /* Bewertung: Systemfarben, gut lesbare Varianten für weiße Schrift */
   --fair:#248A3D; --pin-ink:#FFFFFF;
   /* Geht so = Orange, WTF?! = Gelb (systemOrange / systemYellow) mit schwarzer Schrift */
@@ -35,7 +35,7 @@
   --bg:#000000; --surface:#1C1C1E; --elevated:#2C2C2E;
   --ink:#FFFFFF; --muted:#98989F;
   --line:#38383A; --fill:rgba(118,118,128,.24); --fill-strong:rgba(118,118,128,.32);
-  --tint:#0A84FF; --tint-ink:#FFFFFF; --brand:#FFD60A; --brand-ink:#000000;
+  --tint:#FFD60A; --tint-ink:#000000; --tint-text:#FFD60A; --brand:#FFD60A; --brand-ink:#000000;
   --fair:#30D158; --pin-ink:#000000;
   --meh:#FF9F0A; --wtf:#FFD60A; --warm-ink:#000000; --meh-text:#FF9F0A; --wtf-text:#FFD60A;
   --danger:#FF453A;
@@ -50,7 +50,7 @@
   --bg:#000000; --surface:#1C1C1E; --elevated:#2C2C2E;
   --ink:#FFFFFF; --muted:#98989F;
   --line:#38383A; --fill:rgba(118,118,128,.24); --fill-strong:rgba(118,118,128,.32);
-  --tint:#0A84FF; --tint-ink:#FFFFFF; --brand:#FFD60A; --brand-ink:#000000;
+  --tint:#FFD60A; --tint-ink:#000000; --tint-text:#FFD60A; --brand:#FFD60A; --brand-ink:#000000;
   --fair:#30D158; --pin-ink:#000000;
   --meh:#FF9F0A; --wtf:#FFD60A; --warm-ink:#000000; --meh-text:#FF9F0A; --wtf-text:#FFD60A;
   --danger:#FF453A;
@@ -70,7 +70,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 button,input,select,textarea{font:inherit;color:inherit}
 button{-webkit-tap-highlight-color:transparent}
 :focus-visible{outline:3px solid color-mix(in srgb,var(--tint) 55%,transparent);outline-offset:2px}
-a{color:var(--tint)}
+a{color:var(--tint-text)}
 
 /* ---------- Navigationsleiste ---------- */
 .top{position:sticky;top:env(safe-area-inset-top,0px);z-index:1000;background:var(--bar);
@@ -85,7 +85,7 @@ a{color:var(--tint)}
 .brand-text b{font-family:var(--f-display);font-weight:600;font-size:17px;letter-spacing:-.01em}
 .brand-text span{font-size:13px;color:var(--muted)}
 .demo-tag{font-size:12px;font-weight:600;color:var(--muted);background:var(--fill);padding:4px 10px;border-radius:999px;white-space:nowrap}
-.nav-link{font-size:15px;font-weight:600;color:var(--tint);text-decoration:none;white-space:nowrap;padding:10px 4px}
+.nav-link{font-size:15px;font-weight:600;color:var(--tint-text);text-decoration:none;white-space:nowrap;padding:10px 4px}
 .nav-link:hover{opacity:.7}
 
 /* Index-Auswahl als Segmented Control */
@@ -136,14 +136,14 @@ a{color:var(--tint)}
 .verdict{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;color:var(--pin-ink);margin-top:3px}
 .v-fair{background:var(--fair)} .v-meh{background:var(--meh);color:var(--warm-ink)} .v-wtf{background:var(--wtf);color:var(--warm-ink)}
 .src{font-size:12px;color:var(--muted)}
-.src.crowd{color:var(--tint);font-weight:600}
+.src.crowd{color:var(--tint-text);font-weight:600}
 .old{display:inline-block;font-size:11px;font-weight:600;color:var(--meh-text);background:color-mix(in srgb,var(--meh) 14%,transparent);border-radius:999px;padding:1px 7px;margin-left:3px}
 .sep{padding:18px 16px 6px;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.02em;color:var(--muted);background:var(--bg)}
 .empty-state{background:var(--fill);border-radius:var(--radius-sm);padding:14px;font-size:15px;display:grid;gap:12px;justify-items:start}
 .foot{padding:4px 4px 16px;font-size:13px;color:var(--muted);display:grid;gap:6px}
 .foot p{margin:0}
 .foot .foot-links{margin-top:4px}
-.foot a,.linklike{color:var(--tint);font:inherit;background:none;border:0;padding:0;cursor:pointer;text-decoration:none}
+.foot a,.linklike{color:var(--tint-text);font:inherit;background:none;border:0;padding:0;cursor:pointer;text-decoration:none}
 .foot a:hover,.linklike:hover{text-decoration:underline}
 
 /* ---------- Kartenebenen ---------- */
@@ -163,7 +163,7 @@ a{color:var(--tint)}
 .pin::after{content:"";position:absolute;left:50%;bottom:-7px;transform:translateX(-50%);border:5px solid transparent;border-bottom:0}
 .pin.p-fair{background:var(--fair)} .pin.p-meh{background:var(--meh);color:var(--warm-ink)} .pin.p-wtf{background:var(--wtf);color:var(--warm-ink)}
 .pin.p-fair::after{border-top-color:var(--fair)} .pin.p-meh::after{border-top-color:var(--meh)} .pin.p-wtf::after{border-top-color:var(--wtf)}
-.pin.sel{box-shadow:0 0 0 3px var(--tint),var(--shadow);z-index:5}
+.pin.sel{box-shadow:0 0 0 3px var(--ink),var(--shadow);z-index:5}
 .pin .c{font-size:10px;margin-left:3px;opacity:.9}
 /* Lokale ohne Preis: kleiner runder Marker, unter den Preisschildern */
 .pin.p-none{padding:0;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:700;
@@ -186,9 +186,9 @@ a{color:var(--tint)}
 .pop tr.cur td{font-weight:700}
 .pop .reports{margin-top:10px;font-size:13px}
 .pop .reports b{display:block;font-size:12px;color:var(--muted);margin-bottom:2px}
-.pop a{color:var(--tint);font-weight:500;text-decoration:none}
+.pop a{color:var(--tint-text);font-weight:500;text-decoration:none}
 .pop button{margin-top:12px;width:100%;background:var(--tint);color:var(--tint-ink);border:0;border-radius:var(--radius-sm);min-height:44px;font-size:16px;font-weight:600;cursor:pointer}
-.pop .menu-link{display:block;margin-top:2px;text-align:center;font-size:15px;color:var(--tint);background:none;border:0;cursor:pointer;width:100%;min-height:40px;padding:0;font-weight:500}
+.pop .menu-link{display:block;margin-top:2px;text-align:center;font-size:15px;color:var(--tint-text);background:none;border:0;cursor:pointer;width:100%;min-height:40px;padding:0;font-weight:500}
 .pop .corr{font-size:12px;color:var(--meh-text);font-weight:600}
 .pop .statement{margin-top:10px;padding:10px 12px;background:var(--fill);border-radius:var(--radius-sm);font-size:13px;white-space:pre-wrap}
 .pop .statement b{display:block;font-size:12px;color:var(--muted);margin-bottom:2px;white-space:normal}
@@ -228,11 +228,11 @@ a{color:var(--tint)}
 .file-list li.bad span:first-child{color:var(--danger)}
 .consent{display:flex;gap:10px;align-items:flex-start;font-size:15px;min-height:44px}
 .consent input{width:20px;height:20px;flex:0 0 auto;margin-top:1px}
-#modeHint .hint a{color:var(--tint)}
+#modeHint .hint a{color:var(--tint-text)}
 
 /* Knöpfe */
 .actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
-.btn{border:0;border-radius:var(--radius);padding:0 18px;min-height:44px;font-size:17px;font-weight:600;cursor:pointer;background:var(--fill);color:var(--tint);
+.btn{border:0;border-radius:var(--radius);padding:0 18px;min-height:44px;font-size:17px;font-weight:600;cursor:pointer;background:var(--fill);color:var(--tint-text);
   display:inline-flex;align-items:center;justify-content:center;gap:6px;text-decoration:none}
 .btn:hover{background:var(--fill-strong)}
 .btn.primary{background:var(--tint);color:var(--tint-ink)}
