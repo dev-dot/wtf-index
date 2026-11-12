@@ -524,6 +524,38 @@
     "bier": "„Halbe vom Fass“",
     "maultaschen": "mit hausgemachtem Kartoffelsalat und Zwiebelsößle · Dez. 2024 noch 17,50 € (+6 %)"
    }
+  },
+  {
+   "id": "trude",
+   "name": "Trude",
+   "type": "Bar",
+   "district": "Mitte",
+   "address": "Eberhardstr. 10 (Eingang Töpferstr./Nadlerstr.)",
+   "location": {
+    "lat": 48.7748,
+    "lon": 9.1755
+   },
+   "source": {
+    "label": "eigene Website (Screenshot)",
+    "url": null,
+    "date": "2026-11-12",
+    "stand": "12.11.2026"
+   },
+   "prices": {
+    "bier3": {
+     "price": 4,
+     "tap": "f"
+    },
+    "bier": {
+     "price": 4.5,
+     "tap": "f"
+    }
+   },
+   "notes": {
+    "bier3": "Export oder Meister Pils klar vom Fass",
+    "bier": "Export oder Meister Pils klar vom Fass",
+    "wasser": "Nur 0,25 l und 0,7 l (Mineralwasser 0,7 l 5,50 €)"
+   }
   }
  ]
 }
