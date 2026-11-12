@@ -89,7 +89,7 @@ function addPin(v, html, title, z) {
     icon: L.divIcon({ className: "", html: '<span class="pin-wrap">' + html + '<i class="stem"></i><i class="dot"></i></span>', iconSize: null, popupAnchor: [0, -30] }),
     title, riseOnHover: true, zIndexOffset: z,
   });
-  m.bindPopup(() => popupHtml(v), { maxWidth: 290 });
+  m.bindPopup(() => popupHtml(v), { maxWidth: 290, autoPanPaddingTopLeft: L.point(20, 80) });
   m.on("click", () => select(v.id, false));
   m.on("popupclose", () => { if (selected === v.id) { selected = null; renderList(); } });
   pinLayer.addLayer(m);

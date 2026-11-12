@@ -107,7 +107,7 @@ a{color:var(--tint-text);text-decoration-color:var(--tint);text-decoration-thick
   border-radius:999px;padding:8px 14px;box-shadow:var(--shadow);font-size:13px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;max-width:calc(100% - 24px)}
 .legend-note{color:var(--muted)}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
-.report-fab{position:absolute;right:calc(12px + env(safe-area-inset-right,0px));bottom:24px;z-index:500;background:var(--tint);color:var(--tint-ink);border:0;
+.report-fab{position:absolute;right:calc(12px + env(safe-area-inset-right,0px));top:12px;z-index:500;background:var(--tint);color:var(--tint-ink);border:0;
   border-radius:999px;padding:0 22px;min-height:50px;font-size:17px;font-weight:600;cursor:pointer;box-shadow:0 6px 20px color-mix(in srgb,var(--tint) 35%,transparent)}
 .report-fab:active{transform:scale(.97)}
 
@@ -263,7 +263,7 @@ a{color:var(--tint-text);text-decoration-color:var(--tint);text-decoration-thick
   .list{overflow:visible}
   .switch{margin-left:0;width:100%}
   .chip{min-height:44px}
-  .legend{bottom:84px}
+  .legend{bottom:24px}
   .legend-note{display:none}
   /* Sheet von unten mit Griff */
   .sheet-bg{place-items:end center;padding:0}
