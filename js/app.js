@@ -32,6 +32,10 @@ function median(a) {
   return s.length ? (s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2) : 0;
 }
 function verdict(f) { return f < 0.95 ? ["fair", "Fair"] : f <= 1.12 ? ["meh", "Geht so"] : ["wtf", "WTF?!"]; }
+// Lokale ohne Preis („?“) standardmäßig ausblenden; der Browser merkt sich die Wahl
+let showOpen = false;
+try { showOpen = localStorage.getItem("wtf-index:showOpen") === "1"; } catch { /* gesperrt */ }
+
 function rows() {
   const all = VENUES.map(v => ({ v, e: effective(v, current) }));
   const r = all.filter(x => x.e);
@@ -134,7 +138,7 @@ function render() {
     '<span class="pin p-' + x.vd[0] + (selected === x.v.id ? " sel" : "") + '">' + fmtShort(x.e.price) +
       (x.e.src === "crowd" ? '<span class="c" title="Besucher-Meldung">●</span>' : "") + "</span>",
     x.v.name + ": " + fmt(x.e.price), selected === x.v.id ? 1000 : Math.round(x.f * 100)));
-  open.forEach(v => addPin(v, '<span class="pin p-none' + (selected === v.id ? " sel" : "") + '">?</span>', v.name + ": noch kein Preis", 0));
+  if (showOpen) open.forEach(v => addPin(v, '<span class="pin p-none' + (selected === v.id ? " sel" : "") + '">?</span>', v.name + ": noch kein Preis", 0));
 
   const it = ITEMS[current], worst = r[r.length - 1], best = r[0];
   const oldN = r.filter(x => x.e.old).length;
@@ -153,13 +157,16 @@ function render() {
 }
 function renderList(data) {
   const { r, open } = data || rows();
+  $("openToggleRow").hidden = !open.length;
+  $("showOpenLabel").textContent = "Ohne Preis (" + open.length + ")";
+  $("showOpen").checked = showOpen;
   $("list").innerHTML = r.map((x, i) =>
     '<li class="row' + (selected === x.v.id ? " active" : "") + '" data-id="' + x.v.id + '" tabindex="0" role="button" aria-label="' + esc(x.v.name) + ", " + fmt(x.e.price) + '">' +
     '<span class="rank">' + String(i + 1).padStart(2, "0") + "</span>" +
     '<span class="who"><b>' + esc(x.v.name) + "</b><small>" + esc(x.v.district) + " · " + esc(x.v.type) + (isBeer(current) ? tapLabel(x.e, " · ") : "") +
     "</small><br>" + srcLabel(x.v, x.e, " · ") + "</span>" +
     '<span class="price">' + fmt(x.e.price) + '<br><span class="verdict v-' + x.vd[0] + '">' + x.vd[1] + "</span></span></li>").join("") +
-    (open.length ? '<li class="sep">Noch ohne Preis · ' + open.length + "</li>" + open.map(v =>
+    (showOpen && open.length ? '<li class="sep">Noch ohne Preis · ' + open.length + "</li>" + open.map(v =>
       '<li class="row' + (selected === v.id ? " active" : "") + '" data-id="' + v.id + '" tabindex="0" role="button" aria-label="' + esc(v.name) + ', noch kein Preis">' +
       '<span class="rank">–</span><span class="who"><b>' + esc(v.name) + "</b><small>" + esc(v.district) + " · " + esc(v.type) + "</small>" +
       (v.notes[current] ? '<br><span class="src">' + esc(v.notes[current]) + "</span>" : "") + "</span>" +
@@ -186,6 +193,11 @@ function setItem(it) {
 }
 
 /* ---------- Bedienung ---------- */
+$("showOpen").addEventListener("change", e => {
+  showOpen = e.target.checked;
+  try { localStorage.setItem("wtf-index:showOpen", showOpen ? "1" : "0"); } catch { /* gesperrt */ }
+  render();
+});
 $("switch").innerHTML = Object.entries(ITEMS).map(([k, v]) =>
   '<button type="button" class="chip" data-it="' + k + '" aria-pressed="false"><b>' + (v.emoji ? '<span class="emo" aria-hidden="true">' + v.emoji + "</span> " : "") + v.label + "</b><small>" + v.chip + "</small></button>").join("");
 $("switch").addEventListener("click", e => { const c = e.target.closest(".chip"); if (c) setItem(c.dataset.it); });
