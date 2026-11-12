@@ -105,6 +105,17 @@ async function supabaseBackend() {
       must(await sb.from("menu_uploads").update({ status, reviewed_at: new Date().toISOString(), reviewed_by: user ? user.id : null }).eq("id", id));
     },
     async fileUrl(path) { return must(await sb.storage.from("menus").createSignedUrl(path, 600)).signedUrl; },
+    // Speisekarte von Claude auslesen lassen (Edge Function "extract-menu"); liefert einen Entwurf
+    async extractMenu(id) {
+      const { data, error } = await sb.functions.invoke("extract-menu", { body: { uploadId: id } });
+      if (error) {
+        let text = error.message;
+        try { const body = await error.context.json(); if (body && body.error) text = body.error; } catch { /* keine JSON-Antwort */ }
+        if (/Failed to send|not found|404/i.test(text)) text = "Die Funktion extract-menu ist noch nicht eingerichtet (siehe README).";
+        const e = new Error(text); e.userMessage = text; throw e;
+      }
+      return data.extraction;
+    },
     async deleteMenuFiles(m) {
       if (m.files.length) {
         const { error } = await sb.storage.from("menus").remove(m.files);
@@ -158,6 +169,7 @@ const menuFrom = r => ({
   id: r.id, venueId: r.venue_id, venueName: r.venue_name, venueAddress: r.venue_address, stand: r.stand, note: r.note,
   files: r.files || [], fileNames: r.file_names || [], status: r.status, createdAt: Date.parse(r.created_at),
   filesDeletedAt: r.files_deleted_at ? Date.parse(r.files_deleted_at) : null,
+  extraction: r.extraction || null, extractedAt: r.extracted_at ? Date.parse(r.extracted_at) : null,
 });
 function fileExt(f) {
   const m = /\.([a-z0-9]{2,5})$/i.exec(f.name);
@@ -235,6 +247,18 @@ async function localBackend() {
     async listMenuUploads(status) { return db.menus.filter(m => m.status === status); },
     async setMenuUploadStatus(id, status) { const m = db.menus.find(x => x.id === id); if (m) { m.status = status; save(); } },
     async fileUrl(path) { return db.files[path] || null; },
+    // Lokal gibt es kein Claude: leerer Entwurf zum Ausfüllen von Hand
+    async extractMenu(id) {
+      const m = db.menus.find(x => x.id === id); if (!m) throw new Error("Speisekarte nicht gefunden");
+      const empty = { found: false, price: 0, dish: "", tap: "unbekannt", note: "", confidence: "low" };
+      const extraction = {
+        venue: { name: m.venueName || "", address: m.venueAddress || "", type: "unbekannt", stand: m.stand || "" },
+        items: Object.fromEntries(["wasser", "bier3", "bier", "doener", "pizza", "spaetzle", "maultaschen"].map(k => [k, { ...empty }])),
+        warnings: ["Lokaler Modus: Automatisches Auslesen gibt es nur mit Supabase. Preise bitte von Hand eintragen."],
+      };
+      m.extraction = extraction; m.extractedAt = Date.now(); save();
+      return extraction;
+    },
     async deleteMenuFiles(m) {
       for (const p of m.files) delete db.files[p];
       const x = db.menus.find(y => y.id === m.id); if (x) x.filesDeletedAt = Date.now();

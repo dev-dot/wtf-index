@@ -181,6 +181,7 @@ async function renderMenus() {
   }
   objectUrls.splice(0).forEach(u => URL.revokeObjectURL(u));
   $("menusEmpty").hidden = list.length > 0;
+  menuCache = list;
   box.innerHTML = list.map(m => {
     const known = m.venueId && venues.find(v => v.id === m.venueId);
     const title = known ? esc(known.name) : esc(m.venueName || m.venueId || "Unbekanntes Lokal") + '<span class="new-tag">neu</span>';
@@ -195,7 +196,9 @@ async function renderMenus() {
       (m.filesDeletedAt ? '<div class="muted">Dateien gelöscht am ' + fmtTs(m.filesDeletedAt) + " (Löschfrist).</div>" : "") +
       '<div class="menu-files">' + (m.filesDeletedAt ? [] : m.files).map((p, i) => '<a href="#" data-file="' + esc(p) + '" target="_blank" rel="noopener" title="' + esc(m.fileNames[i] || "") + '">' +
         (/\.pdf$/i.test(m.fileNames[i] || p) ? "PDF<br>" + (i + 1) : "Seite " + (i + 1)) + "</a>").join("") + "</div>" +
-      '<div class="acts">' + open + acts + "</div></article>";
+      '<div class="acts">' + (menuStatus === "pending" && !m.filesDeletedAt
+        ? '<button type="button" class="btn small primary" data-extract="' + m.id + '">' + (m.extraction ? "Entwurf ansehen" : "Preise automatisch auslesen") + "</button>" : "") +
+      open + acts + '</div><div class="draft-slot"></div></article>';
   }).join("");
   // Dateien: kurzlebige Links (Supabase) bzw. lokale Blob-Links nachladen; Bilder als Vorschau
   for (const a of box.querySelectorAll("a[data-file]")) {
@@ -231,6 +234,12 @@ $("menuCards").addEventListener("click", async e => {
     } catch (err) { st.disabled = false; toast("Hat nicht geklappt: " + errText(err)); }
     return;
   }
+  const ex = e.target.closest("[data-extract]");
+  if (ex) { await showDraft(ex.dataset.extract, ex, false); return; }
+  const rx = e.target.closest("[data-reextract]");
+  if (rx) { await showDraft(rx.dataset.reextract, rx, true); return; }
+  const cf = e.target.closest("[data-confirm-draft]");
+  if (cf) { await confirmDraft(cf.dataset.confirmDraft, cf); return; }
   const op = e.target.closest("[data-open]");
   if (op) { showTab("venues"); openVenue(op.dataset.open); return; }
   const cr = e.target.closest("[data-create]");
@@ -242,6 +251,104 @@ $("menuCards").addEventListener("click", async e => {
     fillVenueForm(); renderVenueList(); $("vName").focus();
   }
 });
+
+/* ---------- Speisekarten automatisch auslesen ---------- */
+let menuCache = [];
+const CONF = { high: "sicher", medium: "prüfen", low: "unsicher" };
+async function showDraft(id, btn, force) {
+  const m = menuCache.find(x => x.id === id); if (!m) return;
+  const card = btn.closest(".menu-card"), slot = card.querySelector(".draft-slot");
+  let ex = force ? null : m.extraction;
+  if (!ex) {
+    btn.disabled = true; slot.innerHTML = '<p class="muted">Claude liest die Speisekarte … das kann bis zu einer Minute dauern.</p>';
+    try { ex = await backend.extractMenu(id); m.extraction = ex; }
+    catch (err) { btn.disabled = false; slot.innerHTML = '<p class="msg err">' + esc(err.userMessage || errText(err)) + "</p>"; return; }
+    btn.disabled = false; btn.textContent = "Entwurf ansehen";
+  }
+  card.classList.add("has-draft");
+  slot.innerHTML = draftHtml(m, ex);
+}
+function draftHtml(m, ex) {
+  const known = m.venueId && venues.find(v => v.id === m.venueId);
+  const cur = curMap();
+  const type = ex.venue.type && ex.venue.type !== "unbekannt" ? ex.venue.type : (known ? known.type : "Restaurant");
+  const venueOpts = '<option value="__new">Neues Lokal anlegen</option>' + venues.map(v => '<option value="' + esc(v.id) + '"' + (known && known.id === v.id ? " selected" : "") + ">" + esc(v.name) + "</option>").join("");
+  const rows = ITEM_KEYS.map(it => {
+    const x = ex.items[it] || { found: false, price: 0, dish: "", tap: "unbekannt", note: "", confidence: "low" };
+    const c = known && cur[known.id + "|" + it];
+    const note = [x.dish, x.note].filter(Boolean).join(" · ");
+    return '<tr data-item="' + it + '"><td>' + toggleBtn(it, ITEMS[it].title, !!x.found) + "</td>" +
+      '<td><input type="number" step="0.1" min="0.5" max="60" class="d-price" value="' + (x.found && x.price ? x.price : "") + '" aria-label="Preis ' + esc(ITEMS[it].title) + '"></td>' +
+      "<td>" + (isBeer(it) ? '<select class="d-tap"><option value="">?</option><option value="f"' + (x.tap === "f" ? " selected" : "") + '>Fass</option><option value="b"' + (x.tap === "b" ? " selected" : "") + ">Flasche</option></select>" : "") + "</td>" +
+      '<td><input class="d-note" maxlength="200" value="' + esc(note) + '"></td>' +
+      '<td class="muted">' + (x.found ? '<span class="conf conf-' + esc(x.confidence) + '">' + (CONF[x.confidence] || "") + "</span>" : "") + (c ? "<br>bisher " + fmt(c.price) : "") + "</td></tr>";
+  }).join("");
+  return '<div class="draft" data-id="' + m.id + '">' +
+    '<h4>Entwurf' + (ex.model ? ' <span class="muted">von ' + esc(ex.model) + "</span>" : "") + "</h4>" +
+    (ex.warnings && ex.warnings.length ? '<ul class="d-warn">' + ex.warnings.map(w => "<li>" + esc(w) + "</li>").join("") + "</ul>" : "") +
+    '<div class="grid2">' +
+    '<div class="field"><label>Lokal</label><select class="d-venue">' + venueOpts + "</select></div>" +
+    '<div class="field"><label>Art</label><select class="d-type">' + VENUE_TYPES.map(t => "<option" + (t === type ? " selected" : "") + ">" + t + "</option>").join("") + "</select></div>" +
+    '<div class="field d-new"><label>Name</label><input class="d-name" maxlength="80" value="' + esc(ex.venue.name || m.venueName || "") + '"></div>' +
+    '<div class="field d-new"><label>Adresse</label><input class="d-address" maxlength="120" value="' + esc(ex.venue.address || m.venueAddress || "") + '"></div>' +
+    '<div class="field"><label>Stand (Datum der Karte)</label><input type="date" class="d-date" value="' + today() + '"></div>' +
+    '<div class="field"><label>Stand als Text</label><input class="d-stand" maxlength="40" value="' + esc(ex.venue.stand || m.stand || "") + '"></div>' +
+    "</div>" +
+    '<div class="table-wrap"><table class="tbl d-table"><thead><tr><th>Übernehmen</th><th>Preis €</th><th>Ausschank</th><th>Hinweis (öffentlich)</th><th>Sicherheit</th></tr></thead><tbody>' + rows + "</tbody></table></div>" +
+    '<p class="hint">Preise mit der Speisekarte vergleichen. Übernommen werden nur eingeschaltete Zeilen. Neue Lokale bleiben ausgeblendet, bis ihr dort gegessen und sie freigeschaltet habt.</p>' +
+    '<div class="msg" hidden></div>' +
+    '<div class="actions"><button type="button" class="btn" data-reextract="' + m.id + '">Neu auslesen</button>' +
+    '<button type="button" class="btn primary" data-confirm-draft="' + m.id + '">' + (known ? "Bestätigen: Preise eintragen" : "Bestätigen: Lokal anlegen und Preise eintragen") + "</button></div></div>";
+}
+$("menuCards").addEventListener("change", e => {
+  const sel = e.target.closest(".d-venue"); if (!sel) return;
+  const d = sel.closest(".draft");
+  d.querySelectorAll(".d-new").forEach(f => (f.hidden = sel.value !== "__new"));
+  const v = venues.find(x => x.id === sel.value); if (v) d.querySelector(".d-type").value = v.type;
+  d.querySelector("[data-confirm-draft]").textContent = sel.value === "__new" ? "Bestätigen: Lokal anlegen und Preise eintragen" : "Bestätigen: Preise eintragen";
+});
+// Felder für ein neues Lokal nur zeigen, wenn "Neues Lokal" gewählt ist
+new MutationObserver(() => document.querySelectorAll(".draft .d-venue").forEach(sel => {
+  sel.closest(".draft").querySelectorAll(".d-new").forEach(f => (f.hidden = sel.value !== "__new"));
+})).observe($("menuCards"), { childList: true, subtree: true });
+
+async function confirmDraft(id, btn) {
+  const d = btn.closest(".draft"), m = menuCache.find(x => x.id === id), box = d.querySelector(".msg");
+  const rows = [...d.querySelectorAll(".d-table tr[data-item]")].filter(tr => tr.querySelector(".toggle").getAttribute("aria-pressed") === "true");
+  const items = [];
+  for (const tr of rows) {
+    const it = tr.dataset.item, price = parseFloat(String(tr.querySelector(".d-price").value).replace(",", "."));
+    if (!priceOk(price)) { msg(box, ITEMS[it].title + ": bitte einen Preis zwischen 0,50 € und 60 € eingeben oder die Zeile ausschalten.", true); return; }
+    items.push({ item: it, price: Math.round(price * 100) / 100, tap: tr.querySelector(".d-tap") ? tr.querySelector(".d-tap").value || null : null, note: tr.querySelector(".d-note").value.trim() || null });
+  }
+  const venueSel = d.querySelector(".d-venue").value, isNewVenue = venueSel === "__new";
+  const name = d.querySelector(".d-name").value.trim();
+  if (isNewVenue && !name) { msg(box, "Bitte einen Namen für das Lokal eingeben.", true); return; }
+  if (!items.length && !isNewVenue) { msg(box, "Keine Zeile eingeschaltet. Nichts zu übernehmen.", true); return; }
+  const validFrom = d.querySelector(".d-date").value || today(), standLabel = d.querySelector(".d-stand").value.trim() || null;
+  btn.disabled = true; msg(box, "Wird übernommen …");
+  try {
+    let venueId = venueSel;
+    const type = d.querySelector(".d-type").value;
+    if (isNewVenue) {
+      let vid = slugify(name), n = 2;
+      while (venues.some(x => x.id === vid)) vid = slugify(name).slice(0, 36) + "-" + n++;
+      await backend.saveVenue({ id: vid, name, type, district: "", address: d.querySelector(".d-address").value.trim(), location: null,
+        notes: {}, wanted: [], active: false, statement: null, statementDate: null });
+      venueId = vid;
+    }
+    for (const p of items) {
+      await backend.addPrice({ venueId, item: p.item, price: p.price, tap: p.tap, note: p.note, sourceLabel: "Speisekarte (Einsendung)",
+        sourceUrl: null, validFrom, standLabel, outdated: false });
+    }
+    await backend.setMenuUploadStatus(id, "done");
+    if (m && !m.filesDeletedAt) await backend.deleteMenuFiles(m);
+    await reload();
+    const skipped = items.some(p => p.item === "pizza") && type !== "Pizzeria";
+    toast(items.length + " Preis" + (items.length === 1 ? "" : "e") + " eingetragen" + (isNewVenue ? ", Lokal angelegt (noch ausgeblendet)" : "") + "." + (skipped ? " Hinweis: Margherita zählt nur bei Pizzerien." : ""));
+    showTab("venues"); openVenue(venueId);
+  } catch (err) { btn.disabled = false; msg(box, "Übernehmen fehlgeschlagen: " + (err.userMessage || errText(err)), true); }
+}
 
 /* ---------- Hinweise ---------- */
 let noticeStatus = "open";
