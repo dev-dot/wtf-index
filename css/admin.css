@@ -7,7 +7,7 @@ body.admin { display: block; height: auto; min-height: 100%; font-size: 15px; }
 .admin-actions { display: flex; gap: 8px; margin-left: auto; align-items: center; }
 .btn.small { min-height: 34px; padding: 0 12px; font-size: 14px; border-radius: 8px; }
 .btn.ok { background: var(--fair); color: var(--pin-ink); }
-.btn.bad { background: color-mix(in srgb, var(--wtf) 12%, transparent); color: var(--wtf); }
+.btn.bad { background: color-mix(in srgb, var(--danger) 12%, transparent); color: var(--danger); }
 .muted { color: var(--muted); font-size: 13px; font-weight: 400; }
 code { font-family: var(--f-mono); font-size: .9em; background: var(--fill); padding: 1px 5px; border-radius: 5px; }
 
@@ -44,7 +44,7 @@ code { font-family: var(--f-mono); font-size: .9em; background: var(--fill); pad
 .checks { display: flex; flex-wrap: wrap; gap: 8px; }
 .check, .field .check { display: inline-flex; white-space: nowrap; gap: 8px; align-items: center; font-size: 15px; font-weight: 400; color: var(--ink); min-height: 36px; }
 .check input { width: 20px; height: 20px; }
-.pick-pin { position: absolute; width: 24px; height: 24px; transform: translate(-50%, -100%); border-radius: 50% 50% 50% 0; rotate: -45deg; background: var(--wtf); border: 2px solid var(--surface); box-shadow: var(--shadow); cursor: grab; }
+.pick-pin { position: absolute; width: 24px; height: 24px; transform: translate(-50%, -100%); border-radius: 50% 50% 50% 0; rotate: -45deg; background: var(--danger); border: 2px solid var(--surface); box-shadow: var(--shadow); cursor: grab; }
 
 /* Tabelle als gruppierte Liste */
 .table-wrap { overflow-x: auto; background: var(--surface); border-radius: var(--radius); }
@@ -56,7 +56,7 @@ code { font-family: var(--f-mono); font-size: .9em; background: var(--fill); pad
 .tbl .acts { white-space: nowrap; text-align: right; }
 .tbl .acts .btn + .btn { margin-left: 6px; }
 .diff { display: block; font-size: 12px; font-weight: 500; }
-.diff.up { color: var(--wtf); } .diff.down { color: var(--fair); }
+.diff.up { color: var(--danger); } .diff.down { color: var(--fair); }
 
 /* Lokale und Beiträge: Seitenliste + Editor */
 .venues-layout { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 20px; align-items: start; }
@@ -86,8 +86,8 @@ code { font-family: var(--f-mono); font-size: .9em; background: var(--fill); pad
 .hist li { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
 .hist li .p { color: var(--ink); min-width: 64px; font-variant-numeric: tabular-nums; font-weight: 500; }
 .hist li.current .p { font-weight: 700; }
-.hist button { border: 0; background: none; color: var(--wtf); cursor: pointer; font-size: 13px; padding: 4px 0; margin-left: auto; }
-.hist .corr { color: var(--meh); }
+.hist button { border: 0; background: none; color: var(--danger); cursor: pointer; font-size: 13px; padding: 4px 0; margin-left: auto; }
+.hist .corr { color: var(--meh-text); }
 .price-form { background: var(--bg); border-radius: var(--radius-sm); padding: 14px; display: grid; gap: 12px; }
 .price-form .grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .price-form .field input, .price-form .field select { background: var(--surface); }
@@ -97,7 +97,7 @@ code { font-family: var(--f-mono); font-size: .9em; background: var(--fill); pad
 .menu-card { display: grid; gap: 10px; align-content: start; }
 .menu-card h3 { margin: 0; font-size: 17px; font-weight: 600; }
 .menu-card .meta { color: var(--muted); font-size: 13px; }
-.menu-card .new-tag { display: inline-block; font-size: 11px; font-weight: 600; color: var(--meh); background: color-mix(in srgb, var(--meh) 14%, transparent); border-radius: 999px; padding: 1px 8px; margin-left: 6px; vertical-align: 2px; }
+.menu-card .new-tag { display: inline-block; font-size: 11px; font-weight: 600; color: var(--meh-text); background: color-mix(in srgb, var(--meh) 14%, transparent); border-radius: 999px; padding: 1px 8px; margin-left: 6px; vertical-align: 2px; }
 .menu-files { display: flex; flex-wrap: wrap; gap: 8px; }
 .menu-files a { display: grid; place-items: center; width: 88px; height: 88px; border-radius: var(--radius-sm); background: var(--fill); overflow: hidden; color: var(--ink); text-decoration: none; font-size: 13px; font-weight: 600; text-align: center; }
 .menu-files a img { width: 100%; height: 100%; object-fit: cover; }
