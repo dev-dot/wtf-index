@@ -93,7 +93,6 @@ Bei einer schon eingerichteten Datenbank kommen Änderungen als Dateien in `supa
 2. `2026-11-11_menu_uploads.sql`
 3. `2026-11-11_hinweise_loeschfrist.sql`
 4. `2026-11-12_redaktion.sql`
-5. `2026-11-12_auslesen.sql`
 
 Zugriffsregeln: Alle lesen aktive Lokale, Preise und freigegebene Meldungen. Alle dürfen Meldungen einreichen, die als `pending` ankommen. Schreiben und Freigeben dürfen nur Nutzer aus der Tabelle `admins`.
 
@@ -103,21 +102,6 @@ Zugriffsregeln: Alle lesen aktive Lokale, Preise und freigegebene Meldungen. All
 - Kein Tracking, keine Cookies außer der Anmelde-Sitzung im Admin-Bereich.
 - Hochgeladene Speisekarten werden gelöscht, sobald sie erledigt oder abgelehnt sind, spätestens nach 30 Tagen. Das passiert beim Öffnen des Admin-Bereichs.
 - Hinweise und Meldungen nach dem DSA kommen über das Formular „Hinweis“ (Link „Preis falsch? Für Gastronomen“ auf der Karte) in den Admin-Reiter „Hinweise“.
-
-## Speisekarten automatisch auslesen (Claude)
-
-Im Admin-Reiter „Speisekarten“ liest **„Preise automatisch auslesen“** eine eingesandte Karte (PDF/Fotos) mit Claude aus. Heraus kommt ein **Entwurf**: Lokal (Name, Adresse, Art, Stand) und die Preise der sieben Indizes, jeweils mit Bezeichnung auf der Karte und einer Einschätzung, wie sicher die Zuordnung ist. Nichts wird automatisch veröffentlicht: Erst **„Bestätigen“** legt das Lokal an (ausgeblendet, bis es probiert ist) und trägt die eingeschalteten Preise ein. Danach werden die Dateien gelöscht.
-
-Einrichtung (einmalig):
-
-1. Migration `supabase/migrations/2026-11-12_auslesen.sql` ausführen.
-2. API-Schlüssel auf [console.anthropic.com](https://console.anthropic.com) anlegen.
-3. Im Supabase-Dashboard unter *Edge Functions → Secrets* das Secret `ANTHROPIC_API_KEY` setzen.
-4. Die Funktion anlegen: *Edge Functions → Deploy a new function → Via Editor*, Name `extract-menu`, Inhalt von `supabase/functions/extract-menu/index.ts` einfügen, *Deploy*. (Alternativ mit der Supabase-CLI: `supabase functions deploy extract-menu`.)
-
-Die Funktion prüft, dass der Aufruf von einem Admin kommt, lädt die Dateien aus dem privaten Speicher und schickt sie an Claude (Modell `claude-opus-5-5`, strukturierte JSON-Ausgabe). HEIC-Fotos werden übersprungen. Kosten: je nach Umfang der Karte grob 0,05–0,30 € pro Auslesen.
-
-Ohne Supabase (lokaler Modus) erscheint ein leerer Entwurf zum Ausfüllen von Hand.
 
 ## Kartenkacheln
 

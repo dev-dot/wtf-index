@@ -218,10 +218,6 @@ drop policy if exists "articles admin" on public.articles;
 create policy "articles admin" on public.articles for all to authenticated
   using (public.is_admin()) with check (public.is_admin());
 
--- ---------- Automatisches Auslesen ----------
-alter table public.menu_uploads add column if not exists extraction jsonb;
-alter table public.menu_uploads add column if not exists extracted_at timestamptz;
-
 -- ---------- Ersten Admin anlegen ----------
 -- 1. Im Dashboard unter Authentication > Users einen Nutzer mit E-Mail und Passwort anlegen.
 -- 2. Dann (E-Mail anpassen):

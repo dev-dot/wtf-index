@@ -133,19 +133,3 @@ code { font-family: var(--f-mono); font-size: .92em; background: var(--bg); padd
 #articleList li b { font-weight: 600; }
 #articleList li small { color: var(--muted); font-size: 12px; }
 #articleList li.inactive b { color: var(--muted); }
-
-/* Entwurf aus automatischem Auslesen */
-.menu-card.has-draft { grid-column: 1 / -1; }
-.draft { border-top: 1px solid var(--line); padding-top: 14px; display: grid; gap: 12px; }
-.draft h4 { margin: 0; font-size: 15px; }
-.d-warn { margin: 0; padding: 8px 12px 8px 28px; background: var(--bg); border-left: 3px solid var(--meh); border-radius: 0 6px 6px 0; font-size: 13px; }
-.d-table td { vertical-align: middle; }
-.d-table input, .d-table select { border: 1.5px solid var(--line); background: var(--bg); border-radius: 6px; padding: 6px 8px; width: 100%; min-width: 0; font: inherit; color: inherit; }
-.d-table .d-price { width: 90px; font-family: var(--f-mono); }
-.d-table td:nth-child(4) { min-width: 260px; }
-.d-table .toggle { border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 5px 12px; font-size: 13px; cursor: pointer; white-space: nowrap; }
-.d-table .toggle::before { content: "+ "; color: var(--muted); }
-.d-table .toggle[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--surface); }
-.d-table .toggle[aria-pressed="true"]::before { content: "✓ "; color: inherit; }
-.conf { font-size: 11px; font-weight: 600; padding: 1px 6px; border-radius: 3px; color: var(--pin-ink); }
-.conf-high { background: var(--fair); } .conf-medium { background: var(--meh); } .conf-low { background: var(--wtf); }
