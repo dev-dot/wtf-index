@@ -10,14 +10,14 @@ body.legal { display: block; height: auto; font-size: 17px; }
 .legal-main h1 { font-family: var(--f-display); font-weight: 700; font-size: 34px; line-height: 1.12; letter-spacing: -.02em; margin: 0 0 16px; text-wrap: balance; }
 .legal-main h2 { font-family: var(--f-display); font-weight: 600; font-size: 22px; letter-spacing: -.01em; margin: 32px 0 8px; }
 .legal-main p, .legal-main ul { margin: 0 0 12px; }
-.legal-main a { color: var(--tint-text); text-decoration: none; }
-.legal-main a:hover { text-decoration: underline; }
+.legal-main a { color: var(--ink); text-decoration: underline; text-decoration-color: var(--tint); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+.legal-main a:hover { text-decoration-color: var(--ink); }
 .legal-main .muted { color: var(--muted); }
 .legal-foot {
   max-width: 68ch; margin: 0 auto; border-top: .5px solid var(--line); font-size: 13px; color: var(--muted);
   padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); padding-block: 16px 40px;
 }
-.legal-foot a { color: var(--tint-text); text-decoration: none; }
+.legal-foot a { color: var(--ink); text-decoration: underline; text-decoration-color: var(--tint); text-decoration-thickness: 2px; text-underline-offset: 3px; }
 .lead-text { font-size: 20px; color: var(--muted); line-height: 1.4; }
 
 /* WTF-Report: Liste als gruppierte Karte */

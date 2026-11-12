@@ -13,7 +13,7 @@
   /* Trennlinien und Füllflächen (separator / tertiarySystemFill) */
   --line:#C6C6C8; --fill:rgba(118,118,128,.12); --fill-strong:rgba(118,118,128,.2);
   /* Akzent = Markengelb (systemYellow); auf Gelb schwarze Schrift, für Links ein dunkles Gelb */
-  --tint:#FFCC00; --tint-ink:#000000; --tint-text:#8A6D00; --brand:#FFCC00; --brand-ink:#000000;
+  --tint:#FFCC00; --tint-ink:#000000; --tint-text:var(--ink); --brand:#FFCC00; --brand-ink:#000000;
   /* Bewertung: Systemfarben, gut lesbare Varianten für weiße Schrift */
   --fair:#248A3D; --pin-ink:#FFFFFF;
   /* Geht so = Orange, WTF?! = Gelb (systemOrange / systemYellow) mit schwarzer Schrift */
@@ -35,7 +35,7 @@
   --bg:#000000; --surface:#1C1C1E; --elevated:#2C2C2E;
   --ink:#FFFFFF; --muted:#98989F;
   --line:#38383A; --fill:rgba(118,118,128,.24); --fill-strong:rgba(118,118,128,.32);
-  --tint:#FFD60A; --tint-ink:#000000; --tint-text:#FFD60A; --brand:#FFD60A; --brand-ink:#000000;
+  --tint:#FFD60A; --tint-ink:#000000; --tint-text:var(--ink); --brand:#FFD60A; --brand-ink:#000000;
   --fair:#30D158; --pin-ink:#000000;
   --meh:#FF9F0A; --wtf:#FFD60A; --warm-ink:#000000; --meh-text:#FF9F0A; --wtf-text:#FFD60A;
   --danger:#FF453A;
@@ -50,7 +50,7 @@
   --bg:#000000; --surface:#1C1C1E; --elevated:#2C2C2E;
   --ink:#FFFFFF; --muted:#98989F;
   --line:#38383A; --fill:rgba(118,118,128,.24); --fill-strong:rgba(118,118,128,.32);
-  --tint:#FFD60A; --tint-ink:#000000; --tint-text:#FFD60A; --brand:#FFD60A; --brand-ink:#000000;
+  --tint:#FFD60A; --tint-ink:#000000; --tint-text:var(--ink); --brand:#FFD60A; --brand-ink:#000000;
   --fair:#30D158; --pin-ink:#000000;
   --meh:#FF9F0A; --wtf:#FFD60A; --warm-ink:#000000; --meh-text:#FF9F0A; --wtf-text:#FFD60A;
   --danger:#FF453A;
@@ -70,7 +70,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 button,input,select,textarea{font:inherit;color:inherit}
 button{-webkit-tap-highlight-color:transparent}
 :focus-visible{outline:3px solid color-mix(in srgb,var(--tint) 55%,transparent);outline-offset:2px}
-a{color:var(--tint-text)}
+a{color:var(--tint-text);text-decoration-color:var(--tint);text-decoration-thickness:2px;text-underline-offset:3px}
 
 /* ---------- Navigationsleiste ---------- */
 .top{position:sticky;top:env(safe-area-inset-top,0px);z-index:1000;background:var(--bar);
@@ -85,8 +85,8 @@ a{color:var(--tint-text)}
 .brand-text b{font-family:var(--f-display);font-weight:600;font-size:17px;letter-spacing:-.01em}
 .brand-text span{font-size:13px;color:var(--muted)}
 .demo-tag{font-size:12px;font-weight:600;color:var(--muted);background:var(--fill);padding:4px 10px;border-radius:999px;white-space:nowrap}
-.nav-link{font-size:15px;font-weight:600;color:var(--tint-text);text-decoration:none;white-space:nowrap;padding:10px 4px}
-.nav-link:hover{opacity:.7}
+.nav-link{font-size:15px;font-weight:600;color:var(--ink);text-decoration:none;white-space:nowrap;padding:6px 0 2px;border-bottom:2.5px solid var(--tint)}
+.nav-link:hover{border-bottom-color:var(--ink)}
 
 /* Index-Auswahl als Segmented Control */
 .switch{display:flex;gap:2px;margin-left:auto;background:var(--fill);border-radius:10px;padding:2px;max-width:100%;overflow-x:auto;scrollbar-width:none}
@@ -136,15 +136,15 @@ a{color:var(--tint-text)}
 .verdict{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;color:var(--pin-ink);margin-top:3px}
 .v-fair{background:var(--fair)} .v-meh{background:var(--meh);color:var(--warm-ink)} .v-wtf{background:var(--wtf);color:var(--warm-ink)}
 .src{font-size:12px;color:var(--muted)}
-.src.crowd{color:var(--tint-text);font-weight:600}
+.src.crowd{color:var(--ink);font-weight:600}
 .old{display:inline-block;font-size:11px;font-weight:600;color:var(--meh-text);background:color-mix(in srgb,var(--meh) 14%,transparent);border-radius:999px;padding:1px 7px;margin-left:3px}
 .sep{padding:18px 16px 6px;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.02em;color:var(--muted);background:var(--bg)}
 .empty-state{background:var(--fill);border-radius:var(--radius-sm);padding:14px;font-size:15px;display:grid;gap:12px;justify-items:start}
 .foot{padding:4px 4px 16px;font-size:13px;color:var(--muted);display:grid;gap:6px}
 .foot p{margin:0}
 .foot .foot-links{margin-top:4px}
-.foot a,.linklike{color:var(--tint-text);font:inherit;background:none;border:0;padding:0;cursor:pointer;text-decoration:none}
-.foot a:hover,.linklike:hover{text-decoration:underline}
+.foot a,.linklike{color:var(--ink);font:inherit;background:none;border:0;padding:0;cursor:pointer;text-decoration:underline;text-decoration-color:var(--tint);text-decoration-thickness:2px;text-underline-offset:3px}
+.foot a:hover,.linklike:hover{text-decoration-color:var(--ink)}
 
 /* ---------- Kartenebenen ---------- */
 .city{fill:var(--brand);fill-opacity:.06;stroke:var(--land-line);stroke-width:1.5;stroke-dasharray:6 5;stroke-opacity:.55}
@@ -186,9 +186,9 @@ a{color:var(--tint-text)}
 .pop tr.cur td{font-weight:700}
 .pop .reports{margin-top:10px;font-size:13px}
 .pop .reports b{display:block;font-size:12px;color:var(--muted);margin-bottom:2px}
-.pop a{color:var(--tint-text);font-weight:500;text-decoration:none}
+.pop a{color:var(--ink);font-weight:600;text-decoration:underline;text-decoration-color:var(--tint);text-decoration-thickness:2px;text-underline-offset:3px}
 .pop button{margin-top:12px;width:100%;background:var(--tint);color:var(--tint-ink);border:0;border-radius:var(--radius-sm);min-height:44px;font-size:16px;font-weight:600;cursor:pointer}
-.pop .menu-link{display:block;margin-top:2px;text-align:center;font-size:15px;color:var(--tint-text);background:none;border:0;cursor:pointer;width:100%;min-height:40px;padding:0;font-weight:500}
+.pop .menu-link{display:block;margin-top:2px;text-align:center;font-size:15px;color:var(--ink);text-decoration:underline;text-decoration-color:var(--tint);text-decoration-thickness:2px;text-underline-offset:3px;background:none;border:0;cursor:pointer;width:100%;min-height:40px;padding:0;font-weight:500}
 .pop .corr{font-size:12px;color:var(--meh-text);font-weight:600}
 .pop .statement{margin-top:10px;padding:10px 12px;background:var(--fill);border-radius:var(--radius-sm);font-size:13px;white-space:pre-wrap}
 .pop .statement b{display:block;font-size:12px;color:var(--muted);margin-bottom:2px;white-space:normal}
