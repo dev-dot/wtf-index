@@ -82,7 +82,8 @@ function popupHtml(v) {
 function addPin(v, html, title, z) {
   if (!v.location) return;
   const m = L.marker([v.location.lat, v.location.lon], {
-    icon: L.divIcon({ className: "", html, iconSize: null, popupAnchor: [0, -30] }), title, riseOnHover: true, zIndexOffset: z,
+    icon: L.divIcon({ className: "", html: '<span class="pin-wrap">' + html + '<i class="stem"></i><i class="dot"></i></span>', iconSize: null, popupAnchor: [0, -30] }),
+    title, riseOnHover: true, zIndexOffset: z,
   });
   m.bindPopup(() => popupHtml(v), { maxWidth: 290 });
   m.on("click", () => select(v.id, false));
@@ -92,6 +93,34 @@ function addPin(v, html, title, z) {
 }
 
 /* ---------- Rendering ---------- */
+// Überlappende Preisschilder stapeln: Schilder, die sich bei der aktuellen Zoomstufe überdecken,
+// rutschen nach oben; eine Linie mit Punkt zeigt die echte Lage des Lokals.
+const ROW = 26, GAP = 4;
+function declutter() {
+  const items = [];
+  for (const [id, m] of Object.entries(markers)) {
+    const el = m.getElement(); if (!el) continue;
+    const pin = el.querySelector(".pin"), wrap = el.querySelector(".pin-wrap"); if (!pin || !wrap) continue;
+    if (pin.classList.contains("p-none")) { wrap.style.setProperty("--dy", "0px"); wrap.classList.remove("lifted"); continue; } // „?“ bleibt am Ort
+    const p = map.latLngToContainerPoint(m.getLatLng());
+    items.push({ id, m, wrap, x: p.x, y: p.y, w: pin.offsetWidth || 44, h: pin.offsetHeight || 22 });
+  }
+  // von unten nach oben platzieren, das ausgewählte Lokal zuerst
+  items.sort((a, b) => (a.id === selected ? -1 : b.id === selected ? 1 : b.y - a.y || a.x - b.x));
+  const placed = [];
+  for (const it of items) {
+    let dy = 0;
+    const hits = d => placed.some(q => Math.abs(q.x - it.x) < (q.w + it.w) / 2 + GAP &&
+      Math.abs((q.y - q.dy) - (it.y - d)) < Math.max(q.h, it.h) + 2);
+    while (hits(dy) && dy < ROW * 8) dy += ROW;
+    placed.push({ x: it.x, y: it.y, dy, w: it.w, h: it.h });
+    it.wrap.style.setProperty("--dy", dy + "px");
+    it.wrap.classList.toggle("lifted", dy > 0);
+    const pop = it.m.getPopup(); if (pop) pop.options.offset = L.point(0, -30 - dy);
+  }
+}
+map.on("zoomend resize", () => requestAnimationFrame(declutter));
+
 function render() {
   const { r, med, open } = rows();
   document.querySelectorAll(".chip").forEach(c => {
@@ -120,6 +149,7 @@ function render() {
         '<button type="button" class="btn primary" id="emptyReport">Ersten Preis melden</button></div>');
   const er = $("emptyReport"); if (er) er.addEventListener("click", () => openSheet(null, current));
   renderList({ r, open });
+  requestAnimationFrame(declutter);
 }
 function renderList(data) {
   const { r, open } = data || rows();

@@ -95,7 +95,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 /* map layers */
 .city{fill:var(--brand);fill-opacity:.05;stroke:var(--land-line);stroke-width:2;stroke-dasharray:6 4}
 .leaflet-tile-pane{filter:var(--tile-filter)}
-.pin{position:absolute;transform:translate(-50%,calc(-100% - 6px));display:inline-block;font-family:var(--f-mono);font-weight:600;font-size:12.5px;font-variant-numeric:tabular-nums;padding:3px 7px;border-radius:5px;color:var(--pin-ink);white-space:nowrap;box-shadow:var(--shadow);cursor:pointer;border:1.5px solid var(--surface)}
+.pin{position:absolute;transform:translate(-50%,calc(-100% - 6px - var(--dy,0px)));transition:transform .18s ease;display:inline-block;font-family:var(--f-mono);font-weight:600;font-size:12.5px;font-variant-numeric:tabular-nums;padding:3px 7px;border-radius:5px;color:var(--pin-ink);white-space:nowrap;box-shadow:var(--shadow);cursor:pointer;border:1.5px solid var(--surface)}
 .pin::after{content:"";position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);border:5px solid transparent;border-top-color:inherit;border-bottom:0}
 .pin.p-fair{background:var(--fair)} .pin.p-meh{background:var(--meh)} .pin.p-wtf{background:var(--wtf)}
 .pin.p-fair::after{border-top-color:var(--fair)} .pin.p-meh::after{border-top-color:var(--meh)} .pin.p-wtf::after{border-top-color:var(--wtf)}
@@ -181,3 +181,10 @@ button,input,select,textarea{font:inherit;color:inherit}
 .pop .corr{font-size:11px;color:var(--meh);font-weight:600}
 .pop .statement{margin-top:8px;padding:8px 10px;border-left:3px solid var(--brand);background:var(--bg);border-radius:0 6px 6px 0;font-size:12px;white-space:pre-wrap}
 .pop .statement b{display:block;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:2px;white-space:normal}
+.pin-wrap{position:absolute;left:0;top:0;--dy:0px}
+.pin-wrap .stem,.pin-wrap .dot{display:none;position:absolute;pointer-events:none}
+.pin-wrap.lifted .stem{display:block;left:0;bottom:0;width:1.5px;height:var(--dy);transform:translateX(-50%);background:var(--ink);opacity:.45}
+.pin-wrap.lifted .dot{display:block;left:0;top:0;width:7px;height:7px;border-radius:50%;transform:translate(-50%,-50%);background:var(--ink);border:1.5px solid var(--surface)}
+/* Lokale ohne Preis: kleiner runder Marker, unter den Preisschildern */
+.pin.p-none{padding:0;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-family:var(--f-body);font-weight:700;opacity:.85;box-shadow:none;transform:translate(-50%,calc(-100% - 4px))}
+.pin.p-none::after{bottom:-5px;border-width:4px;border-bottom:0}
