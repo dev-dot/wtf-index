@@ -19,7 +19,7 @@ insert into public.venues (id, name, type, district, address, lat, lon, notes, w
   ('r13', 'Weinstube Zur Kiste', 'Schwäbisch', 'Mitte', 'Kanalstr. 2', 48.7747, 9.1826, '{"wasser":"Website zeigt nur Speisen und Wein, keine Wasserpreise","bier3":"Website zeigt nur Speisen und Wein, keine Bierpreise","bier":"Website zeigt nur Speisen und Wein, keine Bierpreise"}'::jsonb, array[]::text[], true),
   ('r14', 'Weinstube Moegle', 'Schwäbisch', 'Feuerbach', 'Dieterlestr. 32', 48.8127, 9.1598, '{"wasser":"Speisekarte ohne Kaltgetränke","bier3":"Speisekarte ohne Kaltgetränke","bier":"Speisekarte ohne Kaltgetränke"}'::jsonb, array[]::text[], true),
   ('r15', 'Weinstube Burg', 'Schwäbisch', 'Kaltental', 'Burgstr. 29', 48.7468, 9.1312, '{}'::jsonb, array[]::text[], true),
-  ('trude', 'Trude', 'Bar', 'Mitte', 'Eberhardstr. 10 (Eingang Töpferstr./Nadlerstr.)', 48.7748, 9.1755, '{"wasser":"Nur 0,25 l und 0,7 l (Mineralwasser 0,7 l 5,50 €)"}'::jsonb, array[]::text[], true)
+  ('trude', 'Trude', 'Bar', 'Mitte', 'Eberhardstr. 10 (Eingang Töpferstr./Nadlerstr.)', 48.7748, 9.1755, '{}'::jsonb, array[]::text[], true)
 on conflict (id) do update set name = excluded.name, type = excluded.type, district = excluded.district,
   address = excluded.address, lat = excluded.lat, lon = excluded.lon, notes = excluded.notes,
   wanted = excluded.wanted, active = excluded.active, updated_at = now();
@@ -62,7 +62,8 @@ select * from (values
   ('r15', 'spaetzle', 19.5::numeric, null, 'Burg-Kässpatzen mit Weisswein & Lauchzwiebel, Blattsalat · Dez. 2024 noch 18,50 € (+5 %)', 'Hauskarte (PDF)', null, '2026-10-06'::date, 'Herbst/Winter 2026/27', false),
   ('r15', 'maultaschen', 18.5::numeric, null, 'mit hausgemachtem Kartoffelsalat und Zwiebelsößle · Dez. 2024 noch 17,50 € (+6 %)', 'Hauskarte (PDF)', null, '2026-10-06'::date, 'Herbst/Winter 2026/27', false),
   ('trude', 'bier3', 4::numeric, 'f', 'Export oder Meister Pils klar vom Fass', 'eigene Website (Screenshot)', null, '2026-11-12'::date, '12.11.2026', false),
-  ('trude', 'bier', 4.5::numeric, 'f', 'Export oder Meister Pils klar vom Fass', 'eigene Website (Screenshot)', null, '2026-11-12'::date, '12.11.2026', false)
+  ('trude', 'bier', 4.5::numeric, 'f', 'Export oder Meister Pils klar vom Fass', 'eigene Website (Screenshot)', null, '2026-11-12'::date, '12.11.2026', false),
+  ('trude', 'wasser', 5.5::numeric, null, 'Mineralwasser medium/still, 0,7 l', 'eigene Website (Screenshot)', null, '2026-11-12'::date, '12.11.2026', false)
 ) as v(venue_id, item, price, tap, note, source_label, source_url, valid_from, stand_label, outdated)
 where not exists (
   select 1 from public.prices p

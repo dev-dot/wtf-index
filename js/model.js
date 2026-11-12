@@ -6,7 +6,7 @@
 // Report: { id, venueId, item, price, tap, note, status:'pending'|'approved'|'rejected', createdAt (ms) }
 
 export const ITEMS = {
-  wasser:   { emoji: "💧", label: "Wasser",      chip: "0,75 l",     title: "Große Flasche Wasser", spec: "Mineral- oder Tafelwasser, Flasche 0,75 l" },
+  wasser:   { emoji: "💧", label: "Wasser",      chip: "0,7–0,75 l", title: "Große Flasche Wasser", spec: "Mineral- oder Tafelwasser, Flasche 0,7 oder 0,75 l" },
   bier3:    { emoji: "🍺", label: "Bier 0,3",    chip: "0,3 l",      title: "Kleines Bier 0,3 l",   spec: "Pils, Helles oder Export · 0,3 oder 0,33 l · vom Fass, sonst Flasche · kein Weizen" },
   bier:     { emoji: "🍺", label: "Bier 0,5",    chip: "0,5 l",      title: "Bier 0,5 l",           spec: "Pils, Helles oder Export · vom Fass, sonst Flasche · kein Weizen" },
   doener:   { emoji: "🥙", label: "Döner",       chip: "im Brot",    title: "Döner",                spec: "Döner im Brot, normal, ohne Extras" },

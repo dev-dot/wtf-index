@@ -22,7 +22,7 @@ Der WTF-Index versteht sich als journalistisch-redaktionelles Angebot (Verantwor
 
 | Index | Was zählt |
 |---|---|
-| Wasser | Mineral- oder Tafelwasser, Flasche **0,75 l** (0,5-l-Flaschen zählen nicht) |
+| Wasser | Mineral- oder Tafelwasser, Flasche **0,7 oder 0,75 l** (0,5-l-Flaschen zählen nicht) |
 | Bier 0,3 | Pils, Helles oder Export, **0,3 oder 0,33 l**, vom Fass, sonst Flasche, **kein Weizen** |
 | Bier 0,5 | Pils, Helles oder Export, **0,5 l**, vom Fass, sonst Flasche, **kein Weizen** |
 | Döner | Döner im Brot, normal, ohne Extras |

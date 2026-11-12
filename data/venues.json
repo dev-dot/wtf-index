@@ -549,12 +549,15 @@
     "bier": {
      "price": 4.5,
      "tap": "f"
+    },
+    "wasser": {
+     "price": 5.5
     }
    },
    "notes": {
     "bier3": "Export oder Meister Pils klar vom Fass",
     "bier": "Export oder Meister Pils klar vom Fass",
-    "wasser": "Nur 0,25 l und 0,7 l (Mineralwasser 0,7 l 5,50 €)"
+    "wasser": "Mineralwasser medium/still, 0,7 l"
    }
   }
  ]
