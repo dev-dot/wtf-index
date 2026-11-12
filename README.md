@@ -41,7 +41,7 @@ Der WTF-Index versteht sich als journalistisch-redaktionelles Angebot (Verantwor
 ```
 index.html                 Karte
 admin.html                 Admin-Bereich
-css/style.css              Design (hell und dunkel)
+css/style.css              Design nach den Apple Human Interface Guidelines (hell und dunkel)
 css/admin.css              Ergänzungen für den Admin-Bereich
 js/app.js                  Karte, Ranking, Melde-Formular
 js/admin.js                Meldungen freigeben, Lokale und Preise pflegen
@@ -98,7 +98,7 @@ Zugriffsregeln: Alle lesen aktive Lokale, Preise und freigegebene Meldungen. All
 
 ## Datenschutz
 
-- Schriften, Leaflet und die Supabase-Bibliothek liegen in `vendor/` (keine Anfragen an Google oder CDNs).
+- Keine Webschriften (Systemschrift), Leaflet und die Supabase-Bibliothek liegen in `vendor/` (keine Anfragen an Google oder CDNs).
 - Kein Tracking, keine Cookies außer der Anmelde-Sitzung im Admin-Bereich.
 - Hochgeladene Speisekarten werden gelöscht, sobald sie erledigt oder abgelehnt sind, spätestens nach 30 Tagen. Das passiert beim Öffnen des Admin-Bereichs.
 - Hinweise und Meldungen nach dem DSA kommen über das Formular „Hinweis“ (Link „Preis falsch? Für Gastronomen“ auf der Karte) in den Admin-Reiter „Hinweise“.
