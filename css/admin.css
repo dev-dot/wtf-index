@@ -36,7 +36,7 @@ code { font-family: var(--f-mono); font-size: .92em; background: var(--bg); padd
 .form { display: grid; gap: 14px; }
 .field { display: grid; gap: 4px; min-width: 0; }
 .field label, .field .label { font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
-.field input, .field select, .field textarea {
+.field input:not([type=checkbox]):not([type=radio]), .field select, .field textarea {
   border: 1.5px solid var(--line); background: var(--bg); border-radius: 6px; padding: 8px 10px; width: 100%; min-width: 0;
 }
 .field .hint, .hint { font-size: 12px; color: var(--muted); }
@@ -118,3 +118,18 @@ code { font-family: var(--f-mono); font-size: .92em; background: var(--bg); padd
 .notice-msg { white-space: pre-wrap; font-size: 14px; }
 .sel { user-select: all; font-family: var(--f-mono); font-size: 12px; }
 .detect { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; font-size: 13px; background: var(--bg); border-left: 3px solid var(--brand); padding: 6px 10px; border-radius: 0 6px 6px 0; }
+.checks .toggle { border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 5px 12px; font-size: 13px; cursor: pointer; line-height: 1.2; }
+.checks .toggle::before { content: "+ "; color: var(--muted); }
+.checks .toggle[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--surface); }
+.checks .toggle[aria-pressed="true"]::before { content: "✓ "; color: inherit; }
+.checks .toggle:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
+.checks { gap: 6px 6px; }
+
+/* Beitragsliste wie Lokal-Liste */
+#articleList { list-style: none; margin: 0; padding: 4px 0; overflow: auto; }
+#articleList li { padding: 9px 14px; cursor: pointer; border-left: 4px solid transparent; display: grid; gap: 1px; }
+#articleList li:hover, #articleList li.active { background: var(--bg); }
+#articleList li.active { border-left-color: var(--ink); }
+#articleList li b { font-weight: 600; }
+#articleList li small { color: var(--muted); font-size: 12px; }
+#articleList li.inactive b { color: var(--muted); }

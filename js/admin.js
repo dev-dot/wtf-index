@@ -17,6 +17,14 @@ let toastT;
 function toast(t) { const el = $("toast"); el.textContent = t; el.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => (el.hidden = true), 3200); }
 function msg(el, text, err) { el.hidden = !text; el.textContent = text || ""; el.className = "msg" + (err ? " err" : ""); }
 function errText(e) { return (e && (e.message || e.error_description)) || "Unbekannter Fehler"; }
+// Umschalt-Knöpfe statt Checkboxen (zuverlässig auch in Safari)
+const toggleBtn = (value, label, on) => '<button type="button" class="toggle" data-value="' + esc(value) + '" aria-pressed="' + (on ? "true" : "false") + '">' + esc(label) + "</button>";
+const pressedValues = id => [...document.querySelectorAll("#" + id + ' .toggle[aria-pressed="true"]')].map(b => b.dataset.value);
+document.addEventListener("click", e => {
+  const b = e.target.closest(".toggle"); if (!b) return;
+  b.setAttribute("aria-pressed", b.getAttribute("aria-pressed") === "true" ? "false" : "true");
+  b.parentElement.dispatchEvent(new CustomEvent("toggle-change", { bubbles: true }));
+});
 const venueName = id => (venues.find(v => v.id === id) || { name: id }).name;
 const curMap = () => currentPrices(prices);
 
@@ -298,7 +306,7 @@ function openArticle(a) {
   $("aStatus").value = a.status || "draft"; $("aDate").value = a.publishedAt ? toLocalInput(a.publishedAt) : "";
   $("aCorrection").value = a.correction || "";
   setTimeout(updateDetect, 0);
-  $("aVenues").innerHTML = venues.map(v => '<label class="check"><input type="checkbox" value="' + esc(v.id) + '"' + ((a.venueIds || []).includes(v.id) ? " checked" : "") + "> " + esc(v.name) + "</label>").join("");
+  $("aVenues").innerHTML = venues.map(v => toggleBtn(v.id, v.name, (a.venueIds || []).includes(v.id))).join("");
   $("aLink").hidden = !(a.id && a.status === "published"); $("aLink").href = "beitraege.html#" + (a.slug || "");
   $("aDelete").hidden = !a.id; delete $("aDelete").dataset.confirm; $("aDelete").textContent = "Löschen";
   msg($("aMsg"), ""); renderArticleList();
@@ -313,7 +321,7 @@ $("aStatus").addEventListener("change", () => { if ($("aStatus").value === "publ
 // Lokale, die im Text stehen, aber noch nicht angehakt sind
 function detectedMissing() {
   const text = [$("aTitle").value, $("aTeaser").value, $("aBody").value].join("\n");
-  const checked = new Set([...document.querySelectorAll("#aVenues input:checked")].map(c => c.value));
+  const checked = new Set(pressedValues("aVenues"));
   return venuesInText(text, venues).filter(v => !checked.has(v.id));
 }
 function updateDetect() {
@@ -323,10 +331,10 @@ function updateDetect() {
 }
 let detectT;
 ["aTitle", "aTeaser", "aBody"].forEach(id => $(id).addEventListener("input", () => { clearTimeout(detectT); detectT = setTimeout(updateDetect, 300); }));
-$("aVenues").addEventListener("change", updateDetect);
+$("aVenues").addEventListener("toggle-change", updateDetect);
 $("aDetectBtn").addEventListener("click", () => {
   const ids = new Set(detectedMissing().map(v => v.id));
-  document.querySelectorAll("#aVenues input").forEach(c => { if (ids.has(c.value)) c.checked = true; });
+  document.querySelectorAll("#aVenues .toggle").forEach(b => { if (ids.has(b.dataset.value)) b.setAttribute("aria-pressed", "true"); });
   updateDetect();
 });
 
@@ -337,7 +345,7 @@ function readArticleForm() {
     teaser: $("aTeaser").value.trim() || null, body: $("aBody").value, status: $("aStatus").value,
     publishedAt: $("aDate").value ? new Date($("aDate").value).getTime() : null,
     correction: $("aCorrection").value.trim() || null,
-    venueIds: [...document.querySelectorAll("#aVenues input:checked")].map(c => c.value),
+    venueIds: pressedValues("aVenues"),
   };
 }
 function articleHtml(a) {
@@ -395,8 +403,7 @@ $("newVenue").addEventListener("click", () => {
 /* ---------- Lokale: Formular ---------- */
 $("vType").innerHTML = VENUE_TYPES.map(t => "<option>" + t + "</option>").join("");
 $("sources").innerHTML = SOURCE_LABELS.map(s => '<option value="' + esc(s) + '">').join("");
-$("vWanted").innerHTML = ITEM_KEYS.filter(k => !isBeer(k) && k !== "wasser")
-  .map(k => '<label class="check"><input type="checkbox" value="' + k + '"> ' + ITEMS[k].title + "</label>").join("");
+$("vWanted").innerHTML = ITEM_KEYS.filter(k => !isBeer(k) && k !== "wasser").map(k => toggleBtn(k, ITEMS[k].title, false)).join("");
 
 function openVenue(id) {
   const v = venues.find(x => x.id === id); if (!v) return;
@@ -431,7 +438,7 @@ function fillVenueForm() {
   $("vName").value = v.name; $("vType").value = v.type; $("vDistrict").value = v.district; $("vAddress").value = v.address;
   $("vActive").checked = v.active === true || (v.active !== false && !isNew);
   $("vStatement").value = v.statement || ""; $("vStatementDate").value = v.statementDate || "";
-  document.querySelectorAll("#vWanted input").forEach(c => (c.checked = (v.wanted || []).includes(c.value)));
+  document.querySelectorAll("#vWanted .toggle").forEach(b => b.setAttribute("aria-pressed", String((v.wanted || []).includes(b.dataset.value))));
   msg($("vMsg"), "");
   ensurePickMap();
   setTimeout(() => {
@@ -472,7 +479,7 @@ $("venueForm").addEventListener("submit", async e => {
   v.active = $("vActive").checked;
   v.statement = $("vStatement").value.trim() || null;
   v.statementDate = v.statement ? ($("vStatementDate").value || today()) : null;
-  v.wanted = [...document.querySelectorAll("#vWanted input:checked")].map(c => c.value);
+  v.wanted = pressedValues("vWanted");
   if (!v.name) { msg($("vMsg"), "Bitte einen Namen eingeben.", true); $("vName").focus(); return; }
   if (isNew) {
     let id = slugify(v.name), n = 2;
