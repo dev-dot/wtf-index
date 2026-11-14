@@ -294,3 +294,4 @@ input[role=switch]:focus-visible{outline:3px solid color-mix(in srgb,var(--tint)
 .trend-link span{grid-column:1;font-size:12px;color:var(--muted)}
 .trend-link b{grid-column:2;grid-row:1/span 2;font-size:22px;color:var(--muted);font-weight:400}
 .trend-link:hover{background:var(--fill-strong)}
+.pop a.vat-note{font-size:12px;font-weight:600;color:var(--ink)}

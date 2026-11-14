@@ -1,6 +1,7 @@
 import { CONFIG } from "./config.js";
 import { createBackend } from "./backend.js";
 import { ITEMS, isBeer, currentPrices, fmt, fmtShort, esc, historyOf, changeOf, fmtMonth, fmtPct } from "./model.js";
+import { VAT_FOOD_ITEMS, passThrough } from "./mwst.js";
 
 const DRINKS = { wasser: 1, bier3: 1, bier: 1 };
 
@@ -9,12 +10,14 @@ let VENUES = [];
 let ALLPRICES = []; // alle Preise inkl. Verlauf
 // Preisänderung eines Lokals in einem Index (nur Speisekarten-/Team-Preise, ohne Besucher-Meldungen)
 const trendOf = (vid, it) => changeOf(historyOf(ALLPRICES, vid, it));
-function trendHtml(c) {
+function trendHtml(c, it) {
   if (!c) return "";
+  const pt = VAT_FOOD_ITEMS.includes(it) ? passThrough(c.from, c.to) : null;
+  const vat = pt && pt.cut && pt.verdict === "nein" ? '<br><a class="vat-note" href="verlauf.html#' + it + '">MwSt-Senkung nicht weitergegeben: erwartet ' + fmt(pt.expected) + "</a>" : "";
   const dir = c.diff > 0.004 ? "up" : c.diff < -0.004 ? "down" : "flat";
   const arrow = { up: "↑", down: "↓", flat: "→" }[dir];
   return '<span class="trend ' + dir + '">' + arrow + " " + (dir === "flat" ? "unverändert" : fmtPct(c.pct)) + " seit " + fmtMonth(c.from.validFrom) +
-    (dir === "flat" ? "" : " (" + fmt(c.from.price) + ")") + "</span>";
+    (dir === "flat" ? "" : " (" + fmt(c.from.price) + ")") + "</span>" + vat;
 }
 let reports = [];
 let backend = null;
@@ -82,7 +85,7 @@ function popupHtml(v) {
       (isBeer(x.it) && x.e.tap ? " (" + tapLabel(x.e, "").trim() + ")" : "") +
       (x.e.note ? '<br><span class="src">' + esc(x.e.note) + "</span>" : "") + "<br>" + srcLabel(v, x.e, ", ") +
       (x.e.p && x.e.p.correction ? '<br><span class="corr">Korrigiert: ' + esc(x.e.p.correction) + "</span>" : "") +
-      (x.e.src === "menu" && trendOf(v.id, x.it) ? "<br>" + trendHtml(trendOf(v.id, x.it)) : "") +
+      (x.e.src === "menu" && trendOf(v.id, x.it) ? "<br>" + trendHtml(trendOf(v.id, x.it), x.it) : "") +
       "</td><td>" + fmt(x.e.price) + "</td></tr>").join("") + "</table>" : "") +
     (hasCur ? "" : '<div class="reports">' + (v.notes[current] ? esc(v.notes[current]) : "Noch kein Preis für " + ITEMS[current].title + ".") + "</div>") +
     (rep.length ? '<div class="reports"><b>Letzte Meldungen · ' + ITEMS[current].title + "</b>" +

@@ -19,6 +19,19 @@
 <main class="legal-main verlauf-main">
   <h1>Preisverlauf</h1>
   <p class="lead-text">Wie sich die Preise seit früheren Speisekarten verändert haben. Verglichen wird immer derselbe Index im selben Lokal.</p>
+  <section class="vat-card" id="vat" aria-labelledby="vatTitle">
+    <h2 id="vatTitle">Wurde die Mehrwertsteuer-Senkung weitergegeben?</h2>
+    <p class="vat-lead" id="vatLead"></p>
+    <div class="vat-timeline" id="vatTimeline" role="img" aria-label="Mehrwertsteuer auf Speisen im Lokal seit 2019"></div>
+    <div class="table-scroll"><table class="vat-table" id="vatTable"></table></div>
+    <details class="vat-how">
+      <summary>So rechnen wir</summary>
+      <p>Wir vergleichen den Preis desselben Gerichts im selben Lokal auf einer Karte vor und nach einer Änderung des Steuersatzes. Der Nettopreis ist der Preis ohne Mehrwertsteuer (Preis ÷ 1,19 bzw. ÷ 1,07). Bleibt der Nettopreis gleich, wäre die Senkung voll beim Gast angekommen: Aus 19 % auf 7 % wird der Preis dann um gut 10 % günstiger.</p>
+      <p>Grenzen: Zwischen den Karten liegen teils fast zwei Jahre. In dieser Zeit sind Löhne, Lebensmittel und Energie teurer geworden. Ein höherer Nettopreis kann also auch daran liegen. Die Auswahl ist klein und kuratiert, kein repräsentativer Querschnitt. Getränke (immer 19 %) und Döner (zum Mitnehmen immer ermäßigt) sind ausgenommen. Gründe nennen nur die Lokale selbst; ihre Stellungnahmen veröffentlichen wir unter „Das sagt das Lokal“.</p>
+      <p class="vat-sources" id="vatSources"></p>
+    </details>
+  </section>
+
   <nav class="switch" id="switch" aria-label="Index wählen"></nav>
   <section class="card-chart" aria-labelledby="chartTitle">
     <div class="chart-head">
@@ -27,6 +40,7 @@
       <ul class="chart-legend" aria-label="Legende">
         <li><i class="dot-old" aria-hidden="true"></i>früherer Preis</li>
         <li><i class="dot-new" aria-hidden="true"></i>aktueller Preis</li>
+        <li id="legendExp" hidden><i class="dot-exp" aria-hidden="true"></i>bei voller MwSt-Weitergabe</li>
       </ul>
     </div>
     <div class="dumbbell" id="chart" role="list"></div>
