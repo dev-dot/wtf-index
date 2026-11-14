@@ -104,3 +104,23 @@ export function venuesInText(text, venues) {
   const t = String(text || "").toLowerCase();
   return venues.filter(v => { const n = venueMatchName(v).toLowerCase(); return n.length >= 4 && t.includes(n); });
 }
+
+// ---------- Preisverlauf ----------
+// Alle Preise eines Lokals für einen Index, älteste zuerst; pro Datum nur der zuletzt eingetragene.
+export function historyOf(prices, venueId, item) {
+  const byDate = {};
+  for (const p of prices) {
+    if (p.venueId !== venueId || p.item !== item) continue;
+    const c = byDate[p.validFrom];
+    if (!c || (p.createdAt || 0) >= (c.createdAt || 0)) byDate[p.validFrom] = p;
+  }
+  return Object.values(byDate).sort((a, b) => (a.validFrom < b.validFrom ? -1 : 1));
+}
+// Änderung vom ältesten zum neuesten Preis
+export function changeOf(hist) {
+  if (!hist || hist.length < 2) return null;
+  const first = hist[0], last = hist[hist.length - 1];
+  return { from: first, to: last, diff: last.price - first.price, pct: (last.price - first.price) / first.price * 100, points: hist.length };
+}
+export const fmtMonth = iso => new Date(iso + "T12:00:00").toLocaleDateString("de-DE", { month: "short", year: "numeric" });
+export const fmtPct = p => (p > 0.05 ? "+" : p < -0.05 ? "−" : "±") + Math.abs(p).toFixed(0) + " %";

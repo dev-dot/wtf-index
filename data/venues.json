@@ -55,11 +55,21 @@
     }
    },
    "notes": {
-    "pizza": "San Marzano, Fior di Latte · April 2023 noch 10,90 € (+28 %)",
+    "pizza": "San Marzano, Fior di Latte",
     "wasser": "Getränkekarte ohne Wasser und Softdrinks",
     "bier3": "Getränkekarte ohne Bier",
     "bier": "Getränkekarte ohne Bier"
-   }
+   },
+   "history": [
+    {
+     "item": "pizza",
+     "price": 10.9,
+     "sourceLabel": "speisekarte.de",
+     "sourceUrl": null,
+     "validFrom": "2023-04-20",
+     "standLabel": "20.04.2023"
+    }
+   ]
   },
   {
    "id": "r20",
@@ -107,9 +117,17 @@
      "price": 13.5
     }
    },
-   "notes": {
-    "pizza": "April 2024 noch 13,00 € (+4 %)"
-   }
+   "notes": {},
+   "history": [
+    {
+     "item": "pizza",
+     "price": 13,
+     "sourceLabel": "speisekarte.de",
+     "sourceUrl": null,
+     "validFrom": "2024-04-09",
+     "standLabel": "09.04.2024"
+    }
+   ]
   },
   {
    "id": "r04",
@@ -372,12 +390,30 @@
     }
    },
    "notes": {
-    "spaetzle": "mit Röstzwiebeln & Feldsalat · Dez. 2023 noch 17,90 € (+11 %)",
+    "spaetzle": "mit Röstzwiebeln & Feldsalat",
     "wasser": "Ensinger Bio Naturell / Medium",
     "bier3": "Dinkelacker CD Pils vom Fass",
     "bier": "Kein Pils oder Helles in 0,5 l (Hefeweizen 5,90 € zählt nicht)",
-    "maultaschen": "mit Zwiebelschmelze & schwäbischem Kartoffelsalat · Dez. 2023 noch 17,90 € (+17 %)"
-   }
+    "maultaschen": "mit Zwiebelschmelze & schwäbischem Kartoffelsalat"
+   },
+   "history": [
+    {
+     "item": "spaetzle",
+     "price": 17.9,
+     "sourceLabel": "speisekarte.de",
+     "sourceUrl": null,
+     "validFrom": "2023-12-13",
+     "standLabel": "13.12.2023"
+    },
+    {
+     "item": "maultaschen",
+     "price": 17.9,
+     "sourceLabel": "speisekarte.de",
+     "sourceUrl": null,
+     "validFrom": "2023-12-13",
+     "standLabel": "13.12.2023"
+    }
+   ]
   },
   {
    "id": "r12",
@@ -412,11 +448,29 @@
    },
    "notes": {
     "bier3": "Helles Export vom Fass · Pils 5,20 €",
-    "spaetzle": "mit kleinem Salat · Dez. 2024 noch 20,10 € (+13 %)",
+    "spaetzle": "mit kleinem Salat",
     "wasser": "Teinacher Medium / Still",
     "bier": "Kein 0,5 l im Angebot, nur 0,3 l vom Fass (siehe Bier 0,3)",
-    "maultaschen": "geschmelzt mit Kartoffelsalat · Dez. 2024 noch 22,40 € (+11 %)"
-   }
+    "maultaschen": "geschmelzt mit Kartoffelsalat"
+   },
+   "history": [
+    {
+     "item": "spaetzle",
+     "price": 20.1,
+     "sourceLabel": "speisekarte.de",
+     "sourceUrl": null,
+     "validFrom": "2024-12-11",
+     "standLabel": "11.12.2024"
+    },
+    {
+     "item": "maultaschen",
+     "price": 22.4,
+     "sourceLabel": "speisekarte.de",
+     "sourceUrl": null,
+     "validFrom": "2024-12-11",
+     "standLabel": "11.12.2024"
+    }
+   ]
   },
   {
    "id": "r13",
@@ -475,12 +529,30 @@
     }
    },
    "notes": {
-    "spaetzle": "mit Butterzwiebeln & gemischtem Salat · seit Dez. 2024 unverändert",
+    "spaetzle": "mit Butterzwiebeln & gemischtem Salat",
     "wasser": "Speisekarte ohne Kaltgetränke",
     "bier3": "Speisekarte ohne Kaltgetränke",
     "bier": "Speisekarte ohne Kaltgetränke",
     "maultaschen": "geschmälzt oder geröstet mit Ei, mit Salat"
-   }
+   },
+   "history": [
+    {
+     "item": "spaetzle",
+     "price": 14,
+     "sourceLabel": "speisekarte.de",
+     "sourceUrl": null,
+     "validFrom": "2024-12-09",
+     "standLabel": "09.12.2024"
+    },
+    {
+     "item": "maultaschen",
+     "price": 13,
+     "sourceLabel": "speisekarte.de",
+     "sourceUrl": null,
+     "validFrom": "2024-12-09",
+     "standLabel": "09.12.2024"
+    }
+   ]
   },
   {
    "id": "r15",
@@ -518,12 +590,30 @@
     }
    },
    "notes": {
-    "spaetzle": "Burg-Kässpatzen mit Weisswein & Lauchzwiebel, Blattsalat · Dez. 2024 noch 18,50 € (+5 %)",
+    "spaetzle": "Burg-Kässpatzen mit Weisswein & Lauchzwiebel, Blattsalat",
     "wasser": "Teinacher Mineralwasser",
     "bier3": "„Bier-chen vom Fass“",
     "bier": "„Halbe vom Fass“",
-    "maultaschen": "mit hausgemachtem Kartoffelsalat und Zwiebelsößle · Dez. 2024 noch 17,50 € (+6 %)"
-   }
+    "maultaschen": "mit hausgemachtem Kartoffelsalat und Zwiebelsößle"
+   },
+   "history": [
+    {
+     "item": "spaetzle",
+     "price": 18.5,
+     "sourceLabel": "speisekarte.de",
+     "sourceUrl": null,
+     "validFrom": "2024-12-11",
+     "standLabel": "11.12.2024"
+    },
+    {
+     "item": "maultaschen",
+     "price": 17.5,
+     "sourceLabel": "speisekarte.de",
+     "sourceUrl": null,
+     "validFrom": "2024-12-11",
+     "standLabel": "11.12.2024"
+    }
+   ]
   },
   {
    "id": "trude",

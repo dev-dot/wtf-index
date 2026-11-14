@@ -13,6 +13,7 @@ Der WTF-Index ist **kuratiert**: Aufgenommen werden nur Restaurants und Imbisse,
 Der WTF-Index versteht sich als journalistisch-redaktionelles Angebot (Verantwortliche nach § 18 Abs. 2 MStV im Impressum):
 
 - **So arbeiten wir** (`methodik.html`): Auswahl, Unabhängigkeit, Preiserhebung, Bewertung, Stellungnahmen, Korrekturen
+- **Preisverlauf** (`verlauf.html`): früherer → aktueller Preis je Lokal und Index; ältere Preise sind eigene Einträge in `prices` (neuer Preis = neue Zeile)
 - **WTF-Report** (`beitraege.html`): redaktionelle Beiträge, im Admin-Bereich unter „Beiträge“ geschrieben
 - **Das sagt das Lokal:** Stellungnahmen und Gegendarstellungen der Lokale, im Info-Fenster sichtbar
 - **Sichtbare Korrekturen** an Preisen und Beiträgen statt stiller Änderungen
@@ -53,6 +54,7 @@ data/stuttgart-boundary.json  Stadtgrenze (GADM, vereinfacht)
 supabase/schema.sql        Tabellen und Zugriffsregeln
 supabase/seed.sql          Startdaten aus data/venues.json (npm run seed)
 supabase/migrations/       Änderungen für eine bestehende Datenbank
+supabase/data/             Daten-Nachträge (z. B. neue Lokale, Preisverlauf) für die bestehende Datenbank
 ```
 
 Keine Build-Tools nötig: Die Seite ist rein statisch und läuft auf jedem Static-Hosting (Netlify, Vercel, GitHub Pages).

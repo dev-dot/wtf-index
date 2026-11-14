@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Preisverlauf · WTF-Index</title>
+<meta name="description" content="Wie sich die Preise für Wasser, Bier, Döner, Pizza, Käsespätzle und Maultaschen in Stuttgarter Lokalen entwickelt haben.">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#F9F9F9" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1D1D1F" media="(prefers-color-scheme: dark)">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/legal.css">
+<link rel="stylesheet" href="css/verlauf.css">
+</head>
+<body class="legal">
+<header class="top">
+  <a class="brand" href="./"><span class="logo">WTF-Index</span><span class="brand-text"><b>Preisverlauf</b><span>Zurück zur Karte</span></span></a>
+</header>
+<main class="legal-main verlauf-main">
+  <h1>Preisverlauf</h1>
+  <p class="lead-text">Wie sich die Preise seit früheren Speisekarten verändert haben. Verglichen wird immer derselbe Index im selben Lokal.</p>
+  <nav class="switch" id="switch" aria-label="Index wählen"></nav>
+  <section class="card-chart" aria-labelledby="chartTitle">
+    <div class="chart-head">
+      <h2 id="chartTitle">–</h2>
+      <p class="chart-sub" id="chartSub"></p>
+      <ul class="chart-legend" aria-label="Legende">
+        <li><i class="dot-old" aria-hidden="true"></i>früherer Preis</li>
+        <li><i class="dot-new" aria-hidden="true"></i>aktueller Preis</li>
+      </ul>
+    </div>
+    <div class="dumbbell" id="chart" role="list"></div>
+    <div class="axis" id="axis" aria-hidden="true"></div>
+    <p class="chart-empty" id="chartEmpty" hidden>Für diesen Index gibt es noch keinen Vergleich mit einer früheren Karte.</p>
+  </section>
+  <p class="muted" id="noHistory"></p>
+  <p class="muted">Quellen: frühere Speisekarten (z. B. speisekarte.de) und aktuelle Karten der Lokale. Besucher-Meldungen fließen nicht in den Verlauf ein. <a href="methodik.html">So arbeiten wir</a></p>
+</main>
+<div class="tip" id="tip" role="tooltip" hidden></div>
+<footer class="legal-foot">
+  <a href="./">Karte</a> · <a href="beitraege.html">WTF-Report</a> · <a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a>
+</footer>
+<script type="module" src="js/verlauf.js"></script>
+</body>
+</html>

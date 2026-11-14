@@ -1,11 +1,21 @@
 import { CONFIG } from "./config.js";
 import { createBackend } from "./backend.js";
-import { ITEMS, isBeer, currentPrices, fmt, fmtShort, esc } from "./model.js";
+import { ITEMS, isBeer, currentPrices, fmt, fmtShort, esc, historyOf, changeOf, fmtMonth, fmtPct } from "./model.js";
 
 const DRINKS = { wasser: 1, bier3: 1, bier: 1 };
 
 /* ---------- State ---------- */
 let VENUES = [];
+let ALLPRICES = []; // alle Preise inkl. Verlauf
+// Preisänderung eines Lokals in einem Index (nur Speisekarten-/Team-Preise, ohne Besucher-Meldungen)
+const trendOf = (vid, it) => changeOf(historyOf(ALLPRICES, vid, it));
+function trendHtml(c) {
+  if (!c) return "";
+  const dir = c.diff > 0.004 ? "up" : c.diff < -0.004 ? "down" : "flat";
+  const arrow = { up: "↑", down: "↓", flat: "→" }[dir];
+  return '<span class="trend ' + dir + '">' + arrow + " " + (dir === "flat" ? "unverändert" : fmtPct(c.pct)) + " seit " + fmtMonth(c.from.validFrom) +
+    (dir === "flat" ? "" : " (" + fmt(c.from.price) + ")") + "</span>";
+}
 let reports = [];
 let backend = null;
 let current = ITEMS[location.hash.slice(1)] ? location.hash.slice(1) : "doener";
@@ -72,6 +82,7 @@ function popupHtml(v) {
       (isBeer(x.it) && x.e.tap ? " (" + tapLabel(x.e, "").trim() + ")" : "") +
       (x.e.note ? '<br><span class="src">' + esc(x.e.note) + "</span>" : "") + "<br>" + srcLabel(v, x.e, ", ") +
       (x.e.p && x.e.p.correction ? '<br><span class="corr">Korrigiert: ' + esc(x.e.p.correction) + "</span>" : "") +
+      (x.e.src === "menu" && trendOf(v.id, x.it) ? "<br>" + trendHtml(trendOf(v.id, x.it)) : "") +
       "</td><td>" + fmt(x.e.price) + "</td></tr>").join("") + "</table>" : "") +
     (hasCur ? "" : '<div class="reports">' + (v.notes[current] ? esc(v.notes[current]) : "Noch kein Preis für " + ITEMS[current].title + ".") + "</div>") +
     (rep.length ? '<div class="reports"><b>Letzte Meldungen · ' + ITEMS[current].title + "</b>" +
@@ -148,13 +159,25 @@ function render() {
         '</b></div><div class="stat"><span>Teuerst</span><b>' + fmt(worst.e.price) + "</b></div></div>" +
         (r.length > 2 && worst.vd[0] === "wtf" ? '<div class="worst">Größter WTF: <strong>' + esc(worst.v.name) + "</strong> verlangt das " +
           worst.f.toFixed(2).replace(".", ",") + "-Fache des Medians.</div>" : "") +
-        (oldN ? '<div class="spec">' + oldN + " von " + r.length + " Preisen stammen aus alten Karten.</div>" : "")
+        (oldN ? '<div class="spec">' + oldN + " von " + r.length + " Preisen stammen aus alten Karten.</div>" : "") +
+        trendSummaryHtml(r)
       : '<div class="empty-state"><b>Noch keine Preise.</b> Warst du in einem der Lokale? Dann melde den ersten Preis.' +
         '<button type="button" class="btn primary" id="emptyReport">Ersten Preis melden</button></div>');
   const er = $("emptyReport"); if (er) er.addEventListener("click", () => openSheet(null, current));
   renderList({ r, open });
   requestAnimationFrame(declutter);
 }
+// Kurzfassung der Preisentwicklung im aktuellen Index, mit Link zur Verlaufsseite
+function trendSummaryHtml(r) {
+  const cs = r.map(x => trendOf(x.v.id, current)).filter(Boolean);
+  if (!cs.length) return "";
+  const up = cs.filter(c => c.diff > 0.004).length;
+  const avg = cs.reduce((s, c) => s + c.pct, 0) / cs.length;
+  const text = up ? up + " von " + cs.length + " Lokalen mit Verlauf teurer geworden, im Schnitt " + fmtPct(avg)
+    : "Bei " + cs.length + " Lokal" + (cs.length === 1 ? "" : "en") + " mit Verlauf keine Preiserhöhung";
+  return '<a class="trend-link" href="verlauf.html#' + current + '"><span>Preisentwicklung</span>' + text + ' <b aria-hidden="true">›</b></a>';
+}
+
 function renderList(data) {
   const { r, open } = data || rows();
   $("openToggleRow").hidden = !open.length;
@@ -372,6 +395,7 @@ async function boot() {
   try {
     backend = await createBackend();
     const data = await backend.loadAll();
+    ALLPRICES = data.prices;
     const cur = currentPrices(data.prices);
     VENUES = data.venues.map(v => {
       const prices = {};
